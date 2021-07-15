@@ -43,23 +43,27 @@ func resourceIbmIsShare() *schema.Resource {
 			"encryption_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				ForceNew:    true,
 				Computed:    true,
 				Description: "The CRN of the key to use for encrypting this file share.If no encryption key is provided, the share will not be encrypted.",
 			},
 			"initial_owner_gid": {
 				Type:        schema.TypeInt,
 				Optional:    true,
+				ForceNew:    true,
 				Description: "The owner assigned to the file share at creation. The initial group identifier for the file share. Subsequent changes to the owner must be performed by a virtual server instance that has mounted the file share.",
 			},
 			"initial_owner_uid": {
 				Type:        schema.TypeInt,
 				Optional:    true,
+				ForceNew:    true,
 				Description: "The owner assigned to the file share at creation. The initial user identifier for the file share. Subsequent changes to the owner must be performed by a virtual server instance that has mounted the file share.",
 			},
 			"iops": {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				Computed:     true,
+				ForceNew:     true,
 				ValidateFunc: InvokeValidator("ibm_is_share", "iops"),
 				Description:  "The maximum input/output operation performance bandwidth per second for the file share.",
 			},
@@ -78,6 +82,7 @@ func resourceIbmIsShare() *schema.Resource {
 			"resource_group": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				ForceNew:    true,
 				Computed:    true,
 				Description: "The unique identifier of the resource group to use. If unspecified, the account's [default resourcegroup](https://cloud.ibm.com/apidocs/resource-manager#introduction) is used.",
 			},
