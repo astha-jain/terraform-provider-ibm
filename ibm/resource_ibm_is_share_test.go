@@ -43,9 +43,9 @@ func TestAccIbmIsShareAllArgs(t *testing.T) {
 	name := fmt.Sprintf("tf-fs-name-%d", acctest.RandIntRange(10, 100))
 	shareTargetName := fmt.Sprintf("tf-fs-tg-name-%d", acctest.RandIntRange(10, 100))
 	vpcname := fmt.Sprintf("tf-vpc-name-%d", acctest.RandIntRange(10, 100))
-	size := acctest.RandIntRange(10, 3000)
-	//sizeUpdate := acctest.RandIntRange(10, 3000)
-	//nameUpdate := fmt.Sprintf("tf-fs-name-%d", acctest.RandIntRange(10, 100))
+	size := acctest.RandIntRange(10, 50)
+	sizeUpdate := acctest.RandIntRange(51, 70)
+	nameUpdate := fmt.Sprintf("tf-fs-name-%d", acctest.RandIntRange(10, 100))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -59,20 +59,17 @@ func TestAccIbmIsShareAllArgs(t *testing.T) {
 					//resource.TestCheckResourceAttr("ibm_is_share.is_share", "iops", strconv.Itoa(iops)),
 					resource.TestCheckResourceAttr("ibm_is_share.is_share", "name", name),
 					resource.TestCheckResourceAttr("ibm_is_share.is_share", "size", strconv.Itoa(size)),
+					resource.TestCheckResourceAttr("ibm_is_share.is_share", "tags.0", "sr01"),
+					resource.TestCheckResourceAttr("ibm_is_share.is_share", "tags.1", "sr02"),
 				),
 			},
-			/*{
+			{
 				Config: testAccCheckIbmIsShareConfig(vpcname, nameUpdate, sizeUpdate, shareTargetName),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					//resource.TestCheckResourceAttr("ibm_is_share.is_share", "iops", strconv.Itoa(iops)),
 					resource.TestCheckResourceAttr("ibm_is_share.is_share", "name", nameUpdate),
-					resource.TestCheckResourceAttr("ibm_is_share.is_share", "size", strconv.Itoa(size)),
+					resource.TestCheckResourceAttr("ibm_is_share.is_share", "size", strconv.Itoa(sizeUpdate)),
 				),
-			},*/
-			{
-				ResourceName:      "ibm_is_share.is_share",
-				ImportState:       true,
-				ImportStateVerify: true,
 			},
 		},
 	})
@@ -108,6 +105,7 @@ func testAccCheckIbmIsShareConfig(vpcName, name string, size int, shareTergetNam
 			vpc = ibm_is_vpc.testacc_vpc.id
 		}
 		zone = "us-south-2"
+		tags = ["sr01", "sr02"]
 	}
 	`, vpcName, name, shareProfileName, size, shareTergetName)
 }

@@ -988,6 +988,8 @@ resource "ibm_is_share" "is_share" {
 		vpc = ibm_is_vpc.vpc.id
 	}
 	zone = "us-south-2"
+  tags = ["tag1", "tag2"]
+  access_tags = ["accesstag1", "accesstag2"]
 }
 
 resource "ibm_is_share_target" "is_share_target" {

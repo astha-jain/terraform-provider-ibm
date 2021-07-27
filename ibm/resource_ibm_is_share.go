@@ -18,6 +18,13 @@ import (
 	"github.com/IBM/vpc-go-sdk/vpcv1"
 )
 
+const (
+	isFileShareAccessTags = "access_tags"
+	isUserTagType         = "user"
+	isAccessTagType       = "access"
+	isFileShareTags       = "tags"
+)
+
 func resourceIbmIsShare() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceIbmIsShareCreate,
@@ -116,6 +123,22 @@ func resourceIbmIsShare() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 				Description: "The globally unique name of the zone this file share will reside in.",
+			},
+			isFileShareAccessTags: {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Computed:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString, ValidateFunc: InvokeValidator("ibm_is_share", "accesstag")},
+				Set:         resourceIBMVPCHash,
+				Description: "List of access management tags",
+			},
+			isFileShareTags: {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Computed:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString, ValidateFunc: InvokeValidator("ibm_is_share", "tag")},
+				Set:         resourceIBMVPCHash,
+				Description: "List of tags",
 			},
 			"share_targets": {
 				Type:        schema.TypeList,
@@ -222,6 +245,24 @@ func resourceIbmIsShareValidator() *ResourceValidator {
 			MinValue:                   "10",
 			MaxValue:                   "32000",
 		},
+		ValidateSchema{
+			Identifier:                 "tag",
+			ValidateFunctionIdentifier: ValidateRegexpLen,
+			Type:                       TypeString,
+			Optional:                   true,
+			Regexp:                     `^[A-Za-z0-9:_ .-]+$`,
+			MinValueLength:             1,
+			MaxValueLength:             128,
+		},
+		ValidateSchema{
+			Identifier:                 "accesstag",
+			ValidateFunctionIdentifier: ValidateRegexpLen,
+			Type:                       TypeString,
+			Optional:                   true,
+			Regexp:                     `^([ ]*[A-Za-z0-9:_.-]+[ ]*)+$`,
+			MinValueLength:             1,
+			MaxValueLength:             128,
+		},
 	)
 
 	resourceValidator := ResourceValidator{ResourceName: "ibm_is_share", Schema: validateSchema}
@@ -306,7 +347,22 @@ func resourceIbmIsShareCreate(context context.Context, d *schema.ResourceData, m
 	}
 
 	d.SetId(*share.ID)
-
+	if _, ok := d.GetOk(isFileShareTags); ok {
+		oldList, newList := d.GetChange(isFileShareTags)
+		err = UpdateGlobalTagsUsingCRN(oldList, newList, meta, *share.CRN, "", isUserTagType)
+		if err != nil {
+			log.Printf(
+				"Error creating file share (%s) tags: %s", d.Id(), err)
+		}
+	}
+	if _, ok := d.GetOk(isFileShareAccessTags); ok {
+		oldList, newList := d.GetChange(isFileShareAccessTags)
+		err = UpdateGlobalTagsUsingCRN(oldList, newList, meta, *share.CRN, "", isAccessTagType)
+		if err != nil {
+			log.Printf(
+				"Error creating file share (%s) access tags: %s", d.Id(), err)
+		}
+	}
 	return resourceIbmIsShareRead(context, d, meta)
 }
 
@@ -372,15 +428,15 @@ func resourceIbmIsShareRead(context context.Context, d *schema.ResourceData, met
 	if err = d.Set("size", intValue(share.Size)); err != nil {
 		return diag.FromErr(fmt.Errorf("Error setting size: %s", err))
 	}
+	targets := []map[string]interface{}{}
 	if share.Targets != nil {
-		targets := []map[string]interface{}{}
 		for _, targetsItem := range share.Targets {
 			targetsItemMap := dataSourceShareTargetsToMap(targetsItem)
 			targets = append(targets, targetsItemMap)
 		}
-		if err = d.Set("share_targets", targets); err != nil {
-			return diag.FromErr(fmt.Errorf("Error setting targets: %s", err))
-		}
+	}
+	if err = d.Set("share_targets", targets); err != nil {
+		return diag.FromErr(fmt.Errorf("Error setting targets: %s", err))
 	}
 	if share.Zone != nil {
 		if err = d.Set("zone", *share.Zone.Name); err != nil {
@@ -405,7 +461,20 @@ func resourceIbmIsShareRead(context context.Context, d *schema.ResourceData, met
 	if err = d.Set("resource_type", share.ResourceType); err != nil {
 		return diag.FromErr(fmt.Errorf("Error setting resource_type: %s", err))
 	}
+	tags, err := GetGlobalTagsUsingCRN(meta, *share.CRN, "", isUserTagType)
+	if err != nil {
+		log.Printf(
+			"Error getting shares (%s) tags: %s", d.Id(), err)
+	}
 
+	accesstags, err := GetGlobalTagsUsingCRN(meta, *share.CRN, "", isAccessTagType)
+	if err != nil {
+		log.Printf(
+			"Error getting shares (%s) access tags: %s", d.Id(), err)
+	}
+
+	d.Set(isFileShareTags, tags)
+	d.Set(isFileShareAccessTags, accesstags)
 	return nil
 }
 
@@ -449,7 +518,23 @@ func resourceIbmIsShareUpdate(context context.Context, d *schema.ResourceData, m
 			return diag.FromErr(err)
 		}
 	}
+	if d.HasChange(isFileShareTags) {
+		oldList, newList := d.GetChange(isFileShareTags)
+		err := UpdateGlobalTagsUsingCRN(oldList, newList, meta, d.Get("crn").(string), "", isUserTagType)
+		if err != nil {
+			log.Printf(
+				"Error updating shares (%s) tags: %s", d.Id(), err)
+		}
+	}
 
+	if d.HasChange(isFileShareAccessTags) {
+		oldList, newList := d.GetChange(isFileShareAccessTags)
+		err := UpdateGlobalTagsUsingCRN(oldList, newList, meta, d.Get("crn").(string), "", isAccessTagType)
+		if err != nil {
+			log.Printf(
+				"Error updating shares (%s) access tags: %s", d.Id(), err)
+		}
+	}
 	return resourceIbmIsShareRead(context, d, meta)
 }
 

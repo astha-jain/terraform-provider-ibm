@@ -40,33 +40,33 @@ data "ibm_is_share_target" "is_share_target" {
 
 The following arguments are supported:
 
-* `share` - (Required, string) The file share identifier.
-* `share_target` - (Required, string) The share target identifier.
+- `share` - (Required, string) The file share identifier.
+- `share_target` - (Required, string) The share target identifier.
 
 ## Attribute Reference
 
 The following attributes are exported:
 
-* `created_at` - The date and time that the share target was created.
-* `href` - The URL for this share target.
-* `lifecycle_state` - The lifecycle state of the mount target.
-* `mount_path` - The mount path for the share.The IP addresses used in the mount path are currently within the IBM services IP range, but are expected to change to be within one of the VPC's subnets in the future.
-* `name` - The user-defined name for this share target.
-* `resource_type` - The type of resource referenced.
-* `subnet` - The subnet associated with this file share target. Nested `subnet` blocks have the following structure:
-	* `crn` - The CRN for this subnet.
-	* `deleted` - If present, this property indicates the referenced resource has been deleted and providessome supplementary information. Nested `deleted` blocks have the following structure:
-		* `more_info` - Link to documentation about deleted resources.
-	* `href` - The URL for this subnet.
-	* `id` - The unique identifier for this subnet.
-	* `name` - The user-defined name for this subnet.
-	* `resource_type` - The resource type.
-* `vpc` - The VPC to which this share target is allowing to mount the file share. Nested `vpc` blocks have the following structure:
-	* `crn` - The CRN for this VPC.
-	* `deleted` - If present, this property indicates the referenced resource has been deleted and providessome supplementary information. Nested `deleted` blocks have the following structure:
-		* `more_info` - Link to documentation about deleted resources.
-	* `href` - The URL for this VPC.
-	* `id` - The unique identifier for this VPC.
-	* `name` - The unique user-defined name for this VPC.
-	* `resource_type` - The resource type.
+- `created_at` - The date and time that the share target was created.
+- `href` - The URL for this share target.
+- `lifecycle_state` - The lifecycle state of the mount target.
+- `mount_path` - The mount path for the share.The IP addresses used in the mount path are currently within the IBM services IP range, but are expected to change to be within one of the VPC's subnets in the future.
+- `name` - The user-defined name for this share target.
+- `resource_type` - The type of resource referenced.
+- `subnet` - The subnet associated with this file share target. Nested `subnet` blocks have the following structure:
+	- `crn` - The CRN for this subnet.
+	- `deleted` - If present, this property indicates the referenced resource has been deleted and providessome supplementary information. Nested `deleted` blocks have the following structure:
+		- `more_info` - Link to documentation about deleted resources.
+	- `href` - The URL for this subnet.
+	- `id` - The unique identifier for this subnet.
+	- `name` - The user-defined name for this subnet.
+	- `resource_type` - The resource type.
+- `vpc` - The VPC to which this share target is allowing to mount the file share. Nested `vpc` blocks have the following structure:
+	- `crn` - The CRN for this VPC.
+	- `deleted` - If present, this property indicates the referenced resource has been deleted and providessome supplementary information. Nested `deleted` blocks have the following structure:
+		- `more_info` - Link to documentation about deleted resources.
+	- `href` - The URL for this VPC.
+	- `id` - The unique identifier for this VPC.
+	- `name` - The unique user-defined name for this VPC.
+	- `resource_type` - The resource type.
 

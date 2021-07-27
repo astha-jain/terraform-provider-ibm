@@ -149,6 +149,20 @@ func dataSourceIbmIsShares() *schema.Resource {
 							Computed:    true,
 							Description: "The globally unique name of the zone this file share will reside in.",
 						},
+						isFileShareAccessTags: {
+							Type:        schema.TypeSet,
+							Computed:    true,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Set:         resourceIBMVPCHash,
+							Description: "List of access management tags",
+						},
+						isFileShareTags: {
+							Type:        schema.TypeSet,
+							Computed:    true,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Set:         resourceIBMVPCHash,
+							Description: "List of tags",
+						},
 					},
 				},
 			},
@@ -174,20 +188,20 @@ func dataSourceIbmIsSharesRead(context context.Context, d *schema.ResourceData, 
 	if resGrpIntf, ok := d.GetOk("resource_group"); ok {
 		resGrp = resGrpIntf.(string)
 	}
+	listSharesOptions := &vpcv1.ListSharesOptions{}
+
+	if shareName != "" {
+		listSharesOptions.Name = &shareName
+	}
+	if resGrp != "" {
+		listSharesOptions.ResourceGroupID = &resGrp
+	}
 	start := ""
 	allrecs := []vpcv1.Share{}
 	totalCount := 0
 	for {
-		listSharesOptions := &vpcv1.ListSharesOptions{}
-
 		if start != "" {
 			listSharesOptions.Start = &start
-		}
-		if shareName != "" {
-			listSharesOptions.Name = &shareName
-		}
-		if resGrp != "" {
-			listSharesOptions.ResourceGroupID = &resGrp
 		}
 		shareCollection, response, err := vpcClient.ListSharesWithContext(context, listSharesOptions)
 		if err != nil {
@@ -207,7 +221,7 @@ func dataSourceIbmIsSharesRead(context context.Context, d *schema.ResourceData, 
 	d.SetId(dataSourceIbmIsSharesID(d))
 
 	if allrecs != nil {
-		err = d.Set("shares", dataSourceShareCollectionFlattenShares(allrecs))
+		err = d.Set("shares", dataSourceShareCollectionFlattenShares(meta, allrecs))
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("Error setting shares %s", err))
 		}
@@ -224,15 +238,15 @@ func dataSourceIbmIsSharesID(d *schema.ResourceData) string {
 	return time.Now().UTC().String()
 }
 
-func dataSourceShareCollectionFlattenShares(result []vpcv1.Share) (shares []map[string]interface{}) {
+func dataSourceShareCollectionFlattenShares(meta interface{}, result []vpcv1.Share) (shares []map[string]interface{}) {
 	for _, sharesItem := range result {
-		shares = append(shares, dataSourceShareCollectionSharesToMap(sharesItem))
+		shares = append(shares, dataSourceShareCollectionSharesToMap(meta, sharesItem))
 	}
 
 	return shares
 }
 
-func dataSourceShareCollectionSharesToMap(sharesItem vpcv1.Share) (sharesMap map[string]interface{}) {
+func dataSourceShareCollectionSharesToMap(meta interface{}, sharesItem vpcv1.Share) (sharesMap map[string]interface{}) {
 	sharesMap = map[string]interface{}{}
 
 	if sharesItem.CreatedAt != nil {
@@ -284,7 +298,20 @@ func dataSourceShareCollectionSharesToMap(sharesItem vpcv1.Share) (sharesMap map
 	if sharesItem.Zone != nil {
 		sharesMap["zone"] = *sharesItem.Zone.Name
 	}
+	tags, err := GetGlobalTagsUsingCRN(meta, *sharesItem.CRN, "", isUserTagType)
+	if err != nil {
+		log.Printf(
+			"Error getting shares (%s) tags: %s", *sharesItem.ID, err)
+	}
 
+	accesstags, err := GetGlobalTagsUsingCRN(meta, *sharesItem.CRN, "", isAccessTagType)
+	if err != nil {
+		log.Printf(
+			"Error gettings shares (%s) access tags: %s", *sharesItem.ID, err)
+	}
+
+	sharesMap[isFileShareTags] = tags
+	sharesMap[isFileShareAccessTags] = accesstags
 	return sharesMap
 }
 

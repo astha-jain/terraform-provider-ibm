@@ -69,6 +69,8 @@ func TestAccIbmIsShareDataSourceAllArgs(t *testing.T) {
 					resource.TestCheckResourceAttr("data.ibm_is_share.is_share", "share_targets.0.name", shareTargetName),
 					resource.TestCheckResourceAttrSet("data.ibm_is_share.is_share", "share_targets.0.resource_type"),
 					resource.TestCheckResourceAttrSet("data.ibm_is_share.is_share", "zone"),
+					resource.TestCheckResourceAttr("data.ibm_is_share.is_share", "tags.0", "sr1"),
+					resource.TestCheckResourceAttr("data.ibm_is_share.is_share", "tags.1", "sr2"),
 				),
 			},
 		},
@@ -105,6 +107,7 @@ func testAccCheckIbmIsShareDataSourceConfig(vpcName, shareName string, shareSize
 				name = "%s"
 				vpc = ibm_is_vpc.tfvpc.id
 			}
+			tags = ["sr1", "sr2"]
 		}
 		data "ibm_is_share" "is_share" {
 			share = ibm_is_share.is_share.id

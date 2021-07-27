@@ -20,9 +20,17 @@ func dataSourceIbmIsShare() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"share": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The file share identifier.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				ExactlyOneOf: []string{"name", "share"},
+				Description:  "The file share identifier.",
+			},
+			"name": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ExactlyOneOf: []string{"share", "name"},
+				Description:  "Name of the share.",
 			},
 			"created_at": {
 				Type:        schema.TypeString,
@@ -58,11 +66,6 @@ func dataSourceIbmIsShare() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The lifecycle state of the file share.",
-			},
-			"name": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The unique user-defined name for this file share. If unspecified, the name will be a hyphenated list of randomly-selected words.",
 			},
 			"profile": {
 				Type:        schema.TypeString,
@@ -132,6 +135,20 @@ func dataSourceIbmIsShare() *schema.Resource {
 				Computed:    true,
 				Description: "The globally unique name of the zone this file share will reside in.",
 			},
+			isFileShareAccessTags: {
+				Type:        schema.TypeSet,
+				Computed:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Set:         resourceIBMVPCHash,
+				Description: "List of access management tags",
+			},
+			isFileShareTags: {
+				Type:        schema.TypeSet,
+				Computed:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Set:         resourceIBMVPCHash,
+				Description: "List of tags",
+			},
 		},
 	}
 }
@@ -142,21 +159,47 @@ func dataSourceIbmIsShareRead(context context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	getShareOptions := &vpcv1.GetShareOptions{}
+	shareName := d.Get("name").(string)
+	shareId := d.Get("share").(string)
+	var share *vpcv1.Share = nil
+	if shareId != "" {
+		getShareOptions := &vpcv1.GetShareOptions{}
 
-	getShareOptions.SetID(d.Get("share").(string))
+		getShareOptions.SetID(d.Get("share").(string))
 
-	share, response, err := vpcClient.GetShareWithContext(context, getShareOptions)
-	if err != nil {
-		if response != nil {
-			if response.StatusCode == 404 {
-				d.SetId("")
+		shareItem, response, err := vpcClient.GetShareWithContext(context, getShareOptions)
+		if err != nil {
+			if response != nil {
+				if response.StatusCode == 404 {
+					d.SetId("")
+				}
+				log.Printf("[DEBUG] GetShareWithContext failed %s\n%s", err, response)
+				return nil
 			}
-			log.Printf("[DEBUG] GetShareWithContext failed %s\n%s", err, response)
-			return nil
+			log.Printf("[DEBUG] GetShareWithContext failed %s\n", err)
+			return diag.FromErr(err)
 		}
-		log.Printf("[DEBUG] GetShareWithContext failed %s\n", err)
-		return diag.FromErr(err)
+		share = shareItem
+	} else if shareName != "" {
+		listSharesOptions := &vpcv1.ListSharesOptions{}
+
+		if shareName != "" {
+			listSharesOptions.Name = &shareName
+		}
+		shareCollection, response, err := vpcClient.ListSharesWithContext(context, listSharesOptions)
+		if err != nil {
+			log.Printf("[DEBUG] ListSharesWithContext failed %s\n%s", err, response)
+			return diag.FromErr(err)
+		}
+		for _, sharesItem := range shareCollection.Shares {
+			if *sharesItem.Name == shareName {
+				share = &sharesItem
+				break
+			}
+		}
+		if share == nil {
+			return diag.FromErr(fmt.Errorf("[ERROR] Share with provided name %s not found", shareName))
+		}
 	}
 
 	d.SetId(*share.ID)
@@ -222,6 +265,20 @@ func dataSourceIbmIsShareRead(context context.Context, d *schema.ResourceData, m
 			return diag.FromErr(fmt.Errorf("Error setting zone %s", err))
 		}
 	}
+	tags, err := GetGlobalTagsUsingCRN(meta, *share.CRN, "", isUserTagType)
+	if err != nil {
+		log.Printf(
+			"Error getting shares (%s) tags: %s", d.Id(), err)
+	}
+
+	accesstags, err := GetGlobalTagsUsingCRN(meta, *share.CRN, "", isAccessTagType)
+	if err != nil {
+		log.Printf(
+			"Error getting shares (%s) access tags: %s", d.Id(), err)
+	}
+
+	d.Set(isFileShareTags, tags)
+	d.Set(isFileShareAccessTags, accesstags)
 
 	return nil
 }

@@ -21,13 +21,25 @@ func dataSourceIbmIsShareTarget() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"share": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: "The file share identifier.",
 			},
 			"share_target": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: "The share target identifier.",
+			},
+			"share_name": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ExactlyOneOf: []string{"share", "share_name"},
+				Description:  "The file share name.",
+			},
+			"share_target_name": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ExactlyOneOf: []string{"share_target", "share_target_name"},
+				Description:  "The share target name.",
 			},
 			"created_at": {
 				Type:        schema.TypeString,
@@ -165,16 +177,53 @@ func dataSourceIbmIsShareTargetRead(context context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	getShareTargetOptions := &vpcv1.GetShareTargetOptions{}
-
 	share_id := d.Get("share").(string)
-	getShareTargetOptions.SetShareID(share_id)
-	getShareTargetOptions.SetID(d.Get("share_target").(string))
+	share_name := d.Get("share_name").(string)
+	share_target := d.Get("share_target").(string)
+	share_target_name := d.Get("share_target_name").(string)
+	var shareTarget *vpcv1.ShareTarget
+	if share_name != "" {
+		listSharesOptions := &vpcv1.ListSharesOptions{}
+		listSharesOptions.Name = &share_name
+		shareCollection, response, err := vpcClient.ListSharesWithContext(context, listSharesOptions)
+		if err != nil {
+			log.Printf("[DEBUG] ListSharesWithContext failed %s\n%s", err, response)
+			return diag.FromErr(err)
+		}
+		for _, sharesItem := range shareCollection.Shares {
+			if *sharesItem.Name == share_name {
+				share_id = *sharesItem.ID
+				break
+			}
+		}
+	}
+	if share_target_name != "" {
+		listShareTargetsOptions := &vpcv1.ListShareTargetsOptions{}
 
-	shareTarget, response, err := vpcClient.GetShareTargetWithContext(context, getShareTargetOptions)
-	if err != nil {
-		log.Printf("[DEBUG] GetShareTargetWithContext failed %s\n%s", err, response)
-		return diag.FromErr(err)
+		listShareTargetsOptions.SetShareID(share_id)
+		listShareTargetsOptions.SetName(share_target_name)
+
+		shareTargetCollection, response, err := vpcClient.ListShareTargetsWithContext(context, listShareTargetsOptions)
+		if err != nil {
+			log.Printf("[DEBUG] ListShareTargetsWithContext failed %s\n%s", err, response)
+			return diag.FromErr(err)
+		}
+		for _, targetsItem := range shareTargetCollection.Targets {
+			if *targetsItem.Name == share_target_name {
+				shareTarget = &targetsItem
+				break
+			}
+		}
+	} else {
+		getShareTargetOptions := &vpcv1.GetShareTargetOptions{}
+		getShareTargetOptions.SetShareID(share_id)
+		getShareTargetOptions.SetID(share_target)
+		shareTarget1, response, err := vpcClient.GetShareTargetWithContext(context, getShareTargetOptions)
+		if err != nil {
+			log.Printf("[DEBUG] GetShareTargetWithContext failed %s\n%s", err, response)
+			return diag.FromErr(err)
+		}
+		shareTarget = shareTarget1
 	}
 
 	d.SetId(fmt.Sprintf("%s/%s", share_id, *shareTarget.ID))

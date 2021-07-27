@@ -34742,6 +34742,7 @@ func UnmarshalKey(m map[string]json.RawMessage, result interface{}) (err error) 
 type KeyCollection struct {
 	// Collection of keys.
 	Keys []Key `json:"keys" validate:"required"`
+	Next *string
 }
 
 // UnmarshalKeyCollection unmarshals an instance of KeyCollection from the specified map of raw messages.
@@ -36079,7 +36080,7 @@ type ListKeysOptions struct {
 	// Filters the collection to resources within one of the resource groups identified in a comma-separated list of
 	// resource group identifiers.
 	ResourceGroupID *string
-
+	Start           *string
 	// Allows users to set headers on API requests
 	Headers map[string]string
 }

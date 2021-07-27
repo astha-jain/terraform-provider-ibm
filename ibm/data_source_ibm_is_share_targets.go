@@ -25,12 +25,23 @@ func dataSourceIbmIsShareTargets() *schema.Resource {
 				Required:    true,
 				Description: "The file share identifier.",
 			},
+			"name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The user-defined name for this share target.",
+			},
 			"share_targets": {
 				Type:        schema.TypeList,
 				Computed:    true,
 				Description: "Collection of share targets.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The user-defined name for this share target.",
+						},
 						"created_at": {
 							Type:        schema.TypeString,
 							Computed:    true,
@@ -55,11 +66,6 @@ func dataSourceIbmIsShareTargets() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The mount path for the share.The IP addresses used in the mount path are currently within the IBM services IP range, but are expected to change to be within one of the VPC's subnets in the future.",
-						},
-						"name": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "The user-defined name for this share target.",
 						},
 						"resource_type": {
 							Type:        schema.TypeString,
@@ -178,7 +184,9 @@ func dataSourceIbmIsShareTargetsRead(context context.Context, d *schema.Resource
 	listShareTargetsOptions := &vpcv1.ListShareTargetsOptions{}
 
 	listShareTargetsOptions.SetShareID(d.Get("share").(string))
-
+	if name, ok := d.GetOk("name"); ok {
+		listShareTargetsOptions.SetName(name.(string))
+	}
 	shareTargetCollection, response, err := vpcClient.ListShareTargetsWithContext(context, listShareTargetsOptions)
 	if err != nil {
 		log.Printf("[DEBUG] ListShareTargetsWithContext failed %s\n%s", err, response)
