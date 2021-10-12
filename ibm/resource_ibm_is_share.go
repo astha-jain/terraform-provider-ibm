@@ -20,8 +20,6 @@ import (
 
 const (
 	isFileShareAccessTags = "access_tags"
-	isUserTagType         = "user"
-	isAccessTagType       = "access"
 	isFileShareTags       = "tags"
 )
 
