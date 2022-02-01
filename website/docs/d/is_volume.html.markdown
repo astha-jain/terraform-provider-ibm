@@ -1,48 +1,61 @@
 ---
 subcategory: "VPC infrastructure"
 layout: "ibm"
-page_title: "IBM : volume"
+page_title: "IBM : is_volume"
 description: |-
-  Manages IBM Volume.
+  Manages IBM Cloud VPC volume.
 ---
 
-# ibm\_is_volume
+# ibm_is_volume
+Retrieve information of an existing IBM Cloud VSI volume. For more information, about the volume concepts, see [expandable volume concepts for VPC](https://cloud.ibm.com/docs/vpc?topic=vpc-expanding-block-storage-volumes#expandable-volume-concepts).
 
-Provides a vpc volume datasource. This allows to fetch an existing volume.
+**Note:** 
+VPC infrastructure services are a regional specific based endpoint, by default targets to `us-south`. Please make sure to target right region in the provider block as shown in the `provider.tf` file, if VPC service is created in region other than `us-south`.
 
+**provider.tf**
 
-## Example Usage
-
-```hcl
-resource "ibm_is_volume" "testacc_volume"{
-    name = "testvol"
-    profile = "10iops-tier"
-    zone = "us-south-1"
+```terraform
+provider "ibm" {
+  region = "eu-gb"
 }
-data "ibm_is_volume" "testacc_dsvol" {
-    name = ibm_is_volume.testacc_volume.name
+```
+
+## Example usage
+
+```terraform
+resource "ibm_is_volume" "example" {
+  name    = "example-volume"
+  profile = "10iops-tier"
+  zone    = "us-south-1"
+}
+data "ibm_is_volume" "example" {
+  name = ibm_is_volume.example.name
 }
 
 ```
 
-## Argument Reference
+## Argument reference
+Review the argument references that you can specify for your data source. 
 
-The following arguments are supported:
+- `name` - (Required, String) The name of the volume.
+- `zone` - (Optional, String) The zone of the volume.
 
-* `name` - (Required, string) The name of the volume.
-* `zone` - (Optional, string) The zone of the volume.
+## Attribute reference
+In addition to all argument reference list, you can access the following attribute references after your data source is created.
 
-## Attribute Reference
-
-In addition to all arguments above, the following attributes are exported:
-
-* `profile` - The profile to use for this volume.
-* `iops` - The bandwidth for the volume.
-* `capacity` - The capacity of the volume in gigabytes.
-* `encryption_key` - The key to use for encrypting this volume.
-* `resource_group` - The resource group ID for this volume.
-* `tags` - Tags associated with the volume.
-* `status` - The status of the volume. One of [ available, failed, pending, unusable, pending_deletion ].
-* `status_reasons` - Array of reasons for the current status
-  * `code` - A snake case string succinctly identifying the status reason
-  * `message` - An explanation of the status reason
+- `bandwidth` - The maximum bandwidth (in megabits per second) for the volume
+- `capacity` - (String) The capacity of the volume in gigabytes.
+- `crn` - (String) The crn of this volume.
+- `encryption_key` - (String) The key to use for encrypting this volume.
+- `encryption_type` - (String) The type of ecryption used in the volume [**provider_managed**, **user_managed**].
+- `iops` - (String) The bandwidth for the volume.
+- `profile` - (String) The profile to use for this volume.
+- `resource_group` - (String) The resource group ID for this volume.
+- `source_snapshot` - ID of the snapshot, if volume was created from it.
+- `status` - (String) The status of the volume. Supported values are **available**, **failed**, **pending**, **unusable**, **pending_deletion**.
+- `status_reasons` - (List) Array of reasons for the current status.
+  
+  Nested scheme for `status_reasons`:
+  - `code` - (String)  A snake case string identifying the status reason.
+  - `message` - (String)  An explanation of the status reason
+- `tags` - (String) Tags associated with the volume.

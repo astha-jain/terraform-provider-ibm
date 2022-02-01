@@ -3,56 +3,67 @@ subcategory: "VPC infrastructure"
 layout: "ibm"
 page_title: "IBM : is_dedicated_host_group"
 description: |-
-  Manages DedicatedHostGroup.
+  Manages dedicated host group.
 ---
 
-# ibm\_is_dedicated_host_group
+# ibm_is_dedicated_host_group
+Create, update, delete and suspend the dedicated host resource. For more information, about dedicated host groups in your IBM Cloud VPC, see [Dedicated hosts](https://cloud.ibm.com/docs/vpc?topic=vpc-creating-dedicated-hosts-instances).
 
-Provides a resource for DedicatedHostGroup. This allows DedicatedHostGroup to be created, updated and deleted.
+**Note:** 
+VPC infrastructure services are a regional specific based endpoint, by default targets to `us-south`. Please make sure to target right region in the provider block as shown in the `provider.tf` file, if VPC service is created in region other than `us-south`.
 
-## Example Usage
+**provider.tf**
 
-```hcl
-resource "ibm_is_dedicated_host_group" "is_dedicated_host_group" {
-  class = "mx2"
-  family = "balanced"
-  zone = "us-south-1"
-  name = "dh-group-name"
+```terraform
+provider "ibm" {
+  region = "eu-gb"
 }
 ```
 
-## Argument Reference
+## Example usage
 
-The following arguments are supported:
+```terraform
+resource "ibm_is_dedicated_host_group" "example" {
+  class  = "mx2"
+  family = "balanced"
+  zone   = "us-south-1"
+  name   = "example-dh-group"
+}
+```
 
-* `class` - (Required, string) The dedicated host profile class for hosts in this group.
-* `family` - (Required, string) The dedicated host profile family for hosts in this group.
-* `name` - (Optional, string) The unique user-defined name for this dedicated host group. If unspecified, the name will be a hyphenated list of randomly-selected words.
-* `resource_group` - (Optional, string) The unique identifier of the resource group to use. If unspecified, the account's [default resourcegroup](https://cloud.ibm.com/apidocs/resource-manager#introduction) is used.
-* `zone` - (Required, string) The globally unique name of the zone this dedicated host group will reside in.
 
-## Attribute Reference
+## Argument reference
+Review the argument references that you can specify for your resource. 
 
-In addition to all arguments above, the following attributes are exported:
+- `class` - (Required, String) The dedicated host profile class for hosts in this group.
+- `family` - (Required, String) The dedicated host profile family for hosts in this group.
+- `name` - (Optional, String) The unique user defined name for this dedicated host group. If unspecified, the name will be a hyphenated list of randomly selected words.
+- `resource_group` - (Optional, String) The unique ID of the resource group to use. If unspecified, the account's default resource group is used.
+- `zone` - (Required, String) The globally unique name of the zone this dedicated host group will reside in.
 
-* `class` - The dedicated host profile class for hosts in this group.
-* `family` - The dedicated host profile family for hosts in this group.
-* `id` - The unique identifier of the DedicatedHostGroup.
-* `href` - The URL for this dedicated host group.
-* `crn` - The CRN for this dedicated host group.
-* `created_at` - The date and time that the dedicated host group was created.
-* `dedicated_hosts` - The dedicated hosts that are in this dedicated host group.
-* `name` - The unique user-defined name for this dedicated host group.
-* `resource_type` - The type of resource referenced.
-* `resource_group` - The unique identifier of the resource group for this dedicated host.
-* `supported_instance_profiles` - Array of instance profiles that can be used by instances placed on this dedicated host group.
-* `zone` - The zone this dedicated host resides in.
+
+## Attribute reference
+In addition to all argument reference list, you can access the following attribute reference after your resource is created.
+
+- `class`-  (String) The dedicated host profile class for hosts in this group.
+- `family`-  (String) The dedicated host profile family for hosts in this group.
+- `id`-  (String) The unique ID of the dedicated host group.
+- `href`-  (String) The URL for this dedicated host group.
+- `crn`-  (String) The CRN for this dedicated host group.
+- `created_at`-  (String) The date and time that the dedicated host group was created.
+- `dedicated_hosts`-  (String) The dedicated hosts that are in this dedicated host group.
+- `name`-  (String) The unique user defined name for this dedicated host group.
+- `resource_type`-  (String) The type of resource referenced.
+- `resource_group`-  (String) The unique ID of the resource group for this dedicated host.
+- `supported_instance_profiles`-  (String) Array of instance profiles that can be used by instances placed on this dedicated host group.
+- `zone`-  (String) The zone this dedicated host resides in.
 
 
 ## Import
+The `ibm_is_dedicated_host_group` resource can be imported by using dedicated host group ID.
 
-ibm_is_dedicated_host_group can be imported using Dedicated Host Group ID, eg
+**Example**
 
 ```
-$ terraform import ibm_is_dedicated_host_group.example 0716-5fa4a9c4-a194-4915-854b-1c299a2c7684
+$ terraform import ibm_is_dedicated_host_group.example 0716-5fa4a9c4-a194-4915-854b-10101111
 ```

@@ -5,13 +5,13 @@
 
 variable "location" {
   description = "Location Name"
-  type         = string
+  type        = string
 }
 
 variable "managed_from" {
   description = "The IBM Cloud region to manage your Satellite location from. Choose a region close to your on-prem data center for better performance."
-  type         = string
-  default = "wdc"
+  type        = string
+  default     = "wdc"
 }
 
 variable "location_zones" {
@@ -22,23 +22,18 @@ variable "location_zones" {
 
 variable "is_location_exist" {
   description = "Location Name"
-  type         = bool
-  default      = false
+  type        = bool
+  default     = false
 }
 
 variable "location_bucket" {
   description = "COS bucket name"
-  default     = ""
+  default     = null
 }
 
 #################################################################################################
 # IBMCLOUD -  Authentication , Target Variables.
 #################################################################################################
-
-variable "ibmcloud_api_key" {
-  description  = "IBM Cloud API Key"
-  type         = string
-}
 
 variable "resource_group" {
   description = "Name of the resource group on which location has to be created"
@@ -49,14 +44,25 @@ variable "ibm_region" {
   default     = "us-east"
 }
 
+variable "host_labels" {
+  description = "Labels to add to attach host script"
+  type        = list(string)
+  default     = ["env:prod"]
+
+  validation {
+    condition     = can([for s in var.host_labels : regex("^[a-zA-Z0-9:]+$", s)])
+    error_message = "A `host_labels` can include only alphanumeric characters and with one colon."
+  }
+}
+
 variable "host_provider" {
-    description  = "The cloud provider of host|vms"
-    type         = string
-    default      = "ibm"
+  description = "The cloud provider of host|vms"
+  type        = string
+  default     = "ibm"
 }
 
 variable "tags" {
   description = "List of tags associated with this satellite."
   type        = list(string)
-  default     = [ "env:dev" ]
+  default     = ["env:dev"]
 }

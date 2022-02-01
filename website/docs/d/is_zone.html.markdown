@@ -3,34 +3,41 @@ subcategory: "VPC infrastructure"
 layout: "ibm"
 page_title: "IBM : zone"
 description: |-
-  Manages IBM Cloud Zone.
+  Manages IBM Cloud zone.
 ---
 
-# ibm\_is_zone
+# ibm_is_zone
+Retrieve information of an existing IBM Cloud zone in a particular region as a read-only data source. For more information, about IBM Cloud zone, see [creating a VPC in a different region](https://cloud.ibm.com/docs/vpc?topic=vpc-creating-a-vpc-in-a-different-region).
 
-Import the details of an existing IBM Cloud zone in a particular region as a read-only data source. You can then reference the fields of the data source in other resources within the same configuration using interpolation syntax.
+**Note:** 
+VPC infrastructure services are a regional specific based endpoint, by default targets to `us-south`. Please make sure to target right region in the provider block as shown in the `provider.tf` file, if VPC service is created in region other than `us-south`.
 
+**provider.tf**
 
-## Example Usage
+```terraform
+provider "ibm" {
+  region = "eu-gb"
+}
+```
 
-```hcl
+## Example usage
 
-data "ibm_is_zone" "ds_zone" {
+```terraform
+
+data "ibm_is_zone" "example" {
   name   = "us-south-1"
   region = "us-south"
 }
 
 ```
 
-## Argument Reference
+## Argument reference
+Review the argument references that you can specify for your data source. 
 
-The following arguments are supported:
+- `name` - (Required, String) The name of the zone.
+- `region` - (Required, String) The name of the region.
 
-* `name` - (Required, string) The name of the zone.
-* `region` - (Required, string) The name of the region.
+## Attribute reference
+In addition to all argument reference list, you can access the following attribute references after your data source is created. 
 
-## Attribute Reference
-
-In addition to all arguments above, the following attributes are exported:
-
-* `status` - The status of zone.
+- `status` - (String) The status of the zone.

@@ -4,43 +4,48 @@ subcategory: "Resource management"
 layout: "ibm"
 page_title: "IBM: ibm_resource_group"
 description: |-
-  Get information about an IBM resource Group.
+  Get information about an IBM resource group.
 ---
 
-# ibm\_resource_group
+# ibm_resource_group
+Retrieve information about an existing IBM resource group as a read-only data source. For more information, about resource group, see [managing resource groups](https://cloud.ibm.com/docs/account?topic=account-rgs).
 
-Import the details of an existing IBM resource Group as a read-only data source. You can then reference the fields of the data source in other resources within the same configuration by using interpolation syntax.
+## Example usage
+The following example enables you to import the resource group by name.
 
-## Example Usage
-
-Import the resource group by name
-
-```hcl
+```terraform
 data "ibm_resource_group" "group" {
   name = "test"
 }
 ```
 
-Import the default resource group
+### Example to import the default resource group
 
-```hcl
+```terraform
 data "ibm_resource_group" "group" {
   is_default = "true"
 }
 ```
 
-## Argument Reference
+## Argument reference
+Review the argument references that you can specify for your data source. 
 
-The following arguments are supported:
+- `is_default` - (Optional, Bool) Specifies whether you want to import default resource group.  **Note**: Conflicts with the  `name`.
+- `name` - (Optional, String) The name of an IBM Cloud resource group. You can retrieve the value by running the `ibmcloud resource groups` command in the [IBM Cloud CLI](https://cloud.ibm.com/docs/cli?topic=cloud-cli-getting-started).  **Note**: Conflicts with `is_default`.
 
-* `name` - (Optional, string) The name of the IBM Cloud resource group. You can retrieve the value by running the `ibmcloud resource groups` command in the [IBM Cloud CLI](https://cloud.ibm.com/docs/cli?topic=cloud-cli-getting-started).  
-  **NOTE**: Conflicts with `is_default`.
+## Attribute reference
+In addition to all argument reference list, you can access the following attribute references after your data source is created. 
 
-* `is_default` - (Optional, boolean) Specifies whether you want to import default resource group.  
-  **NOTE**: Conflicts with `name`.
+- `account_id` - (String) Account ID.  
+- `crn` - (String) The full CRN associated with the resource group.
+- `created_at` - (Timestamp) The date when the resource group initially created.
+- `default` - (Bool) Specifies whether its default resource group or not.
+- `id` - (String) The unique identifier of the new resource group.
+- `payment_methods_url` - (String) The URL to access the payment methods details that is associated with the resource group.
+- `quota_url` - (String) The URL to access the quota details that is associated with the resource group.
+- `quota_id` - (String) An alpha-numeric value identifying the quota ID associated with the resource group.
+- `resource_linkages` - (String) An array of the resources that is linked to the resource group.
+- `state` - (String) The state of the resource group.
+- `teams_url` -  (String) The URL to access the team details that is associated with the resource group.
+- `updated_at` - (Timestamp) The date when the resource group last updated.
 
-## Attribute Reference
-
-In addition to all arguments above, the following attributes are exported:
-
-* `id` - The unique identifier of the resource group.  

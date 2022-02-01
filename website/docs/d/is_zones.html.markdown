@@ -3,31 +3,38 @@ subcategory: "VPC infrastructure"
 layout: "ibm"
 page_title: "IBM : zones"
 description: |-
-  Manages IBM Cloud Zones.
+  Manages IBM Cloud zones.
 ---
 
-# ibm\_is_zones
+# ibm_is_zones
+Retrieve information of an existing IBM Cloud zones in a particular region as a read-only data source. For more information, about IBM Cloud zones, see [creating a VPC in a different region](https://cloud.ibm.com/docs/vpc?topic=vpc-creating-a-vpc-in-a-different-region).
 
-Import the details of an existing IBM Cloud zones in a particular region as a read-only data source. You can then reference the fields of the data source in other resources within the same configuration using interpolation syntax.
+**Note:** 
+VPC infrastructure services are a regional specific based endpoint, by default targets to `us-south`. Please make sure to target right region in the provider block as shown in the `provider.tf` file, if VPC service is created in region other than `us-south`.
 
+**provider.tf**
 
-## Example Usage
+```terraform
+provider "ibm" {
+  region = "eu-gb"
+}
+```
 
-```hcl
-data "ibm_is_zones" "ds_zones" {
+## Example usage
+
+```terraform
+data "ibm_is_zones" "example" {
   region = "us-south"
 }
 ```
 
-## Argument Reference
+## Argument reference
+Review the argument references that you can specify for your data source. 
 
-The following arguments are supported:
+- `region` - (Required, String) The name of the region.
+- `status` - (Optional, String) Filter the list by status of zones.
 
-* `region` - (Required, string) The name of the region.
-* `status` - (Optional, string) Filter the list by status of zones.
+## Attribute reference
+In addition to all argument reference list, you can access the following attribute references after your data source is created. 
 
-## Attribute Reference
-
-In addition to all arguments above, the following attributes are exported:
-
-* `zones` - The list of zones in a region.
+- `zones` - (String) The list of zones in an IBM Cloud region.  For example, **us-south-1**,**us-south-2**.

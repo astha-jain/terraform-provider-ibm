@@ -3,24 +3,22 @@ subcategory: "Satellite"
 layout: "ibm"
 page_title: "IBM : satellite_host"
 description: |-
-  Assigns hosts to satellite location control plane or satellite cluster.
+  Assigns hosts to Satellite location control plane or Satellite cluster.
 ---
 
-# ibm\_satellite_host
-
+# ibm_satellite_host
 Create, update, or delete [IBM Cloud Satellite Host](https://cloud.ibm.com/docs/satellite?topic=satellite-hosts). Assign a host to an IBM Cloud Satellite location or cluster. Before you can assign hosts to clusters, first assign at least three hosts to the Satellite location, to run control plane operations. Then, when you have Satellite clusters, you can assign hosts as needed to provide compute resources for your workloads. You can assign hosts by specifying a host ID or by providing labels to match hosts to your request.
 
 
-## Example Usage
+## Example usage
 
-###  Assign satellite host to satellite control plane using IBM VPC
+###  Sample to assign Satellite host to Satellite control plane using IBM VPC
 
-```hcl
+```terraform
 resource "ibm_satellite_host" "assign_host" {
   count         = 3
 
-  location      = "satellite-ibm"
-  cluster       = "satellite-ibm"
+  location      = var.location
   host_id       = element(var.host_vms, count.index)
   labels        = ["env:prod"]
   zone          = element(var.location_zones, count.index)
@@ -29,9 +27,9 @@ resource "ibm_satellite_host" "assign_host" {
 
 ```
 
-###  Assign satellite host to satellite control plane using AWS EC2
+###  Sample to assign Satellite host to Satellite control plane using AWS EC2
 
-```hcl
+```terraform
 resource "ibm_satellite_host" "assign_host" {
   count         = 3
 
@@ -44,9 +42,9 @@ resource "ibm_satellite_host" "assign_host" {
 
 ```
 
-###  Assign satellite host to openshift satellite cluster
+###  Sample to assign Satellite host to openshift Satellite cluster
 
-```hcl
+```terraform
 resource "ibm_satellite_host" "assign_host" {
   count         = 3
 
@@ -59,36 +57,45 @@ resource "ibm_satellite_host" "assign_host" {
 }
 
 ```
+## Timeouts
 
-## Argument Reference
+The `ibm_satellite_host` provides the following [timeouts](https://www.terraform.io/docs/language/resources/syntax.html) configuration options:
 
-The following arguments are supported:
-
-* `location` - (Required, string) The name or ID of the Satellite location.
-* `cluster` - (Optional, string) The name or ID of a Satellite location or cluster to assign the host to.
-* `host_id` - (Required, string) The specific host ID to assign to a Satellite location or cluster.
-* `labels` - (Optional, array of strings) Key-value pairs to label the host, such as cpu=4 to describe the host capabilities.
-* `worker_pool` - (Optional, string) The name or ID of the worker pool within the cluster to assign the host to.
-* `host_provider` - (Optional, string) The name of host provider, such as ibm, aws or azure.
+- **Create** The assignment of hosts is considered failed if no response is received for 75 minutes.
+- **Update** The updation of the host assignment is considered failed if no response is received for 45 minutes.
+- **Delete** The deletion of the hosts is considered failed if no response is received for 45 minutes.
 
 
-## Attributes Reference
+## Argument reference
+Review the argument references that you can specify for your resource. 
 
-In addition to all arguments above, the following attributes are exported:
+- `cluster` - (Optional, String)   The name or ID of a Satellite  location or cluster to assign the host to.
+- `host_id` - (Required, String)   The specific host ID to assign to a Satellite  location or cluster.
+- `host_provider` - (Optional, String) The name of host provider, such as `ibm`, `aws` or `azure`.
+ - `location` - (Required, String) The name or ID of the Satellite  location.
+- `labels`- (Optional, Array of Strings) The key value pairs to label the host, such as `cpu=4` to describe the host capabilities.
+- `worker_pool` - (Optional, String) The name or ID of the worker pool within the cluster to assign the host to.
 
-* `id`   - The unique identifier of the location.The id is combination of location and host_id delimited by `/`.
-* `host_state` - Health status of the host.
-* `zone` - The zone within the cluster to assign the host to.
+
+
+## Attribute reference
+In addition to all argument reference list, you can access the following attribute reference after your resource is created.
+
+- `id` - (String) The unique identifier of the location. The ID is combination of location and host_id delimited by `/`.
+- `host_state` - (String)  Health status of the host.
+- `zone` - (String) The zone within the cluster to assign the host to.
 
 ## Import
+The `ibm_satellite_host` resource can be imported by using the location and host ID.
 
-`ibm_satellite_host` can be imported using the location and host_id.
-
-Example:
+**Syntax**
 
 ```
 $ terraform import ibm_satellite_host.host location/host_id
+```
 
-$ terraform import ibm_satellite_host.host satellite-ibm/c0kinbrw0hjumlpcqd3g
+**Example**
 
+```
+$ terraform import ibm_satellite_host.host satellite-ibm/c0kinbr12312312
 ```

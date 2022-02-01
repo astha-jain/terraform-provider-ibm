@@ -4,36 +4,44 @@ subcategory: "VPC infrastructure"
 layout: "ibm"
 page_title: "IBM : ibm_is_security_group_target"
 description: |-
-  Manages IBM Security Group Target
+  Manages IBM Cloud security group target.
 ---
 
 # ibm_is_security_group_target
+Retrieve information of an existing security group target as a read only data source. For more information, about security group target, see [required permissions](https://cloud.ibm.com/docs/vpc?topic=vpc-resource-authorizations-required-for-api-and-cli-calls).
 
-This request retrieves a single target for a given security group, The target must be an existing target of the security group.
+**Note:** 
+VPC infrastructure services are a regional specific based endpoint, by default targets to `us-south`. Please make sure to target right region in the provider block as shown in the `provider.tf` file, if VPC service is created in region other than `us-south`.
 
-## Example Usage
+**provider.tf**
 
-In the following example, you can create a security group target:
-
-```hcl
-data "ibm_is_security_group_target" "testacc_security_group_target" {
-    security_group = "r006-5b77aa07-7dfb-4c74-a1bd-904b23cbe198"
-    name = "securitygrouptargetname"
+```terraform
+provider "ibm" {
+  region = "eu-gb"
 }
 ```
 
-## Argument Reference
+## Example usage
+In the following example, you can create a security group target:
 
-The following arguments are supported:
+```terraform
+data "ibm_is_security_group_target" "example" {
+  security_group = ibm_is_security_group.example.id
+  name           = "example-security-group-target"
+}
+```
 
-- `security_group` - (Required, string) The security group identifier
-- `name` - (Required, string) The user-defined name of the target
+## Argument reference
+Review the argument references that you can specify for your resource. 
 
-## Attribute Reference
+- `security_group` - (Required, String) The security group identifier.
+- `name` - (Required, String) The user defined name of the target.
 
-The following attributes are exported:
+## Attribute reference
+In addition to all argument reference list, you can access the following attribute references after your data source is created. 
 
-- `id` - The unique identifier of the security group target. The id is composed of <`security_group_id`>/<`target_id`>.
-- `name` - The user-defined name of the target
-- `resource_type` - The resource type
-- `more_info` - Link to documentation about deleted resources
+- `crn` - (String) The CRN for this target.
+- `id` - (String) The unique identifier of the security group target. The ID is composed of <`security_group_id`>/<`target_id`>.
+- `name` - (String) The user defined name of the target.
+- `resource_type` - (String) The resource type.
+- `more_info` - (String) Link to documentation about deleted resources.

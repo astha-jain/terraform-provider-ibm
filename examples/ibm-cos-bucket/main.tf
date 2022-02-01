@@ -13,14 +13,14 @@ resource "ibm_resource_instance" "activity_tracker" {
   resource_group_id = data.ibm_resource_group.cos_group.id
   service           = "logdnaat"
   plan              = "lite"
-  location          = "us-south"
+  location          =  var.regional_loc
 }
 resource "ibm_resource_instance" "metrics_monitor" {
   name              = "metrics_monitor"
   resource_group_id = data.ibm_resource_group.cos_group.id
   service           = "sysdig-monitor"
   plan              = "graduated-tier"
-  location          = "us-south"
+  location          = var.regional_loc
   parameters        = {
     default_receiver = true
   }
@@ -30,6 +30,7 @@ resource "ibm_cos_bucket" "standard-ams03" {
   resource_instance_id  = ibm_resource_instance.cos_instance.id
   single_site_location  = var.single_site_loc
   storage_class         = var.storage
+  hard_quota            = var.quota
   activity_tracking {
     read_data_events     = true
     write_data_events    = true
@@ -48,6 +49,7 @@ resource "ibm_cos_bucket" "lifecycle_rule_cos" {
   resource_instance_id = ibm_resource_instance.cos_instance.id
   region_location      = var.regional_loc
   storage_class        = var.storage
+  hard_quota           = var.quota
   archive_rule {
     rule_id = var.archive_ruleid
     enable  = true
@@ -66,4 +68,47 @@ resource "ibm_cos_bucket" "lifecycle_rule_cos" {
     minimum = var.minimum_retention
     permanent = false
   }
+}
+
+resource "ibm_cos_bucket" "cos_bucket" {
+  bucket_name           = var.bucket_name
+  resource_instance_id  = ibm_resource_instance.cos_instance.id
+  region_location       = var.regional_loc
+  storage_class         = var.storage
+  hard_quota            = var.quota
+  object_versioning {
+    enable  = true
+  }
+  abort_incomplete_multipart_upload_days {
+    rule_id = var.abort_mpu_ruleid
+    enable  = true
+    prefix  = var.abort_mpu_prefix
+    days_after_initiation = var.abort_mpu_days_init
+  }
+  expire_rule {
+    rule_id = var.expire_ruleid
+    enable  = true
+    date    = var.expire_date
+    prefix  = var.expire_prefix
+  }
+  noncurrent_version_expiration {
+    rule_id = var.nc_exp_ruleid
+    enable  = true
+    prefix  = var.nc_exp_prefix
+    noncurrent_days = var.nc_exp_days
+  }
+}
+
+resource "ibm_cos_bucket_object" "plaintext" {
+  bucket_crn      = ibm_cos_bucket.cos_bucket.crn
+  bucket_location = ibm_cos_bucket.cos_bucket.region_location
+  content         = "Hello World"
+  key             = "plaintext.txt"
+}
+
+resource "ibm_cos_bucket_object" "base64" {
+  bucket_crn      = ibm_cos_bucket.cos_bucket.crn
+  bucket_location = ibm_cos_bucket.cos_bucket.region_location
+  content_base64  = "RW5jb2RlZCBpbiBiYXNlNjQ="
+  key             = "base64.txt"
 }

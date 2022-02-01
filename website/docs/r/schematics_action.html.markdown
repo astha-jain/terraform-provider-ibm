@@ -4,16 +4,15 @@ layout: "ibm"
 page_title: "IBM : ibm_schematics_action"
 sidebar_current: "docs-ibm-resource-schematics-action"
 description: |-
-  Manages schematics_action.
+  Manages the Schematics action.
 ---
 
-# ibm\_schematics_action
+# ibm_schematics_action
+Create, update, and delete `ibm_schematics_action`. For more information, about Schematics action, refer to [setting up actions](https://cloud.ibm.com/docs/schematics?topic=schematics-action-setup).
 
-Provides a resource for ibm_schematics_action. This allows ibm_schematics_action to be created, updated and deleted.
+## Example usage
 
-## Example Usage
-
-```hcl
+```terraform
 resource "ibm_schematics_action" "schematics_action" {
   name = "<action_name>"
   description = "<action_description>"
@@ -22,83 +21,211 @@ resource "ibm_schematics_action" "schematics_action" {
 }
 ```
 
-## Argument Reference
+## Argument reference
 
-The following arguments are supported:
+Review the argument reference that you can specify for your resource.
 
-* `name` - (Optional, string) Action name (unique for an account).
-* `description` - (Optional, string) Action description.
-* `location` - (Optional, string) List of action locations supported by IBM Cloud Schematics service.  **Note** this does not limit the location of the resources provisioned using Schematics.
-* `resource_group` - (Optional, string) Resource-group name for an action.  By default, action is created in default resource group.
-* `tags` - (Optional, List) Action tags.
-* `user_state` - (Optional, List) User defined status of the Schematics object.
-  * `state` - (Optional, string) User defined states  * `draft` Object can be modified, and can be used by jobs run by an author, during execution  * `live` Object can be modified, and can be used by jobs during execution  * `locked` Object cannot be modified, and can be used by jobs during execution  * `disable` Object can be modified, and cannot be used by Jobs during execution.
-  * `set_by` - (Optional, string) Name of the user who set the state of an Object.
-  * `set_at` - (Optional, TypeString) When the user who set the state of an Object.
-* `source_readme_url` - (Optional, string) URL of the `README` file, for the source.
+- `action_inputs` - (Optional, List) Input variables for the Action.
+Nested scheme for **action_inputs**:
+	* `name` - (Optional, String) Name of the variable.
+	* `value` - (Optional, String) Value for the variable or reference to the value.
+	* `metadata` - (Optional, List) User editable metadata for the variables.
+	Nested scheme for **metadata**:
+		* `type` - (Optional, String) Type of the variable.
+		  * Constraints: Allowable values are: boolean, string, integer, date, array, list, map, complex
+		* `aliases` - (Optional, List) List of aliases for the variable name.
+		* `description` - (Optional, String) Description of the meta data.
+		* `default_value` - (Optional, String) Default value for the variable, if the override value is not specified.
+		* `secure` - (Optional, Boolean) Is the variable secure or sensitive ?.
+		* `immutable` - (Optional, Boolean) Is the variable readonly ?.
+		* `hidden` - (Optional, Boolean) If true, the variable will not be displayed on UI or CLI.
+		* `options` - (Optional, List) List of possible values for this variable.  If type is integer or date, then the array of string will be  converted to array of integers or date during runtime.
+		* `min_value` - (Optional, Integer) Minimum value of the variable. Applicable for integer type.
+		* `max_value` - (Optional, Integer) Maximum value of the variable. Applicable for integer type.
+		* `min_length` - (Optional, Integer) Minimum length of the variable value. Applicable for string type.
+		* `max_length` - (Optional, Integer) Maximum length of the variable value. Applicable for string type.
+		* `matches` - (Optional, String) Regex for the variable value.
+		* `position` - (Optional, Integer) Relative position of this variable in a list.
+		* `group_by` - (Optional, String) Display name of the group this variable belongs to.
+		* `source` - (Optional, String) Source of this meta-data.
+	* `link` - (Optional, String) Reference link to the variable value By default the expression will point to self.value.
+* `action_outputs` - (Optional, List) Output variables for the Action.
+Nested scheme for **action_outputs**:
+	* `name` - (Optional, String) Name of the variable.
+	* `value` - (Optional, String) Value for the variable or reference to the value.
+	* `metadata` - (Optional, List) User editable metadata for the variables.
+	Nested scheme for **metadata**:
+		* `type` - (Optional, String) Type of the variable.
+		  * Constraints: Allowable values are: boolean, string, integer, date, array, list, map, complex
+		* `aliases` - (Optional, List) List of aliases for the variable name.
+		* `description` - (Optional, String) Description of the meta data.
+		* `default_value` - (Optional, String) Default value for the variable, if the override value is not specified.
+		* `secure` - (Optional, Boolean) Is the variable secure or sensitive ?.
+		* `immutable` - (Optional, Boolean) Is the variable readonly ?.
+		* `hidden` - (Optional, Boolean) If true, the variable will not be displayed on UI or CLI.
+		* `options` - (Optional, List) List of possible values for this variable.  If type is integer or date, then the array of string will be  converted to array of integers or date during runtime.
+		* `min_value` - (Optional, Integer) Minimum value of the variable. Applicable for integer type.
+		* `max_value` - (Optional, Integer) Maximum value of the variable. Applicable for integer type.
+		* `min_length` - (Optional, Integer) Minimum length of the variable value. Applicable for string type.
+		* `max_length` - (Optional, Integer) Maximum length of the variable value. Applicable for string type.
+		* `matches` - (Optional, String) Regex for the variable value.
+		* `position` - (Optional, Integer) Relative position of this variable in a list.
+		* `group_by` - (Optional, String) Display name of the group this variable belongs to.
+		* `source` - (Optional, String) Source of this meta-data.
+	* `link` - (Optional, String) Reference link to the variable value By default the expression will point to self.value.
+* `bastion` - (Optional, List) Describes a bastion resource. MaxItems: 1.
+Nested scheme for **bastion**:
+	* `name` - (Optional, String) Bastion Name(Unique).
+	* `host` - (Optional, String) Reference to the Inventory resource definition.
+* `bastion_credential` - (Optional, List) User editable variable data & system generated reference to value. MaxItems: 1
+Nested scheme for **bastion_credential**:
+	* `name` - (Optional, String) Name of the variable.
+	* `value` - (Optional, String) Value for the variable or reference to the value.
+	* `metadata` - (Optional, List) User editable metadata for the variables.
+	Nested scheme for **metadata**:
+		* `type` - (Optional, String) Type of the variable.
+		  * Constraints: Allowable values are: boolean, string, integer, date, array, list, map, complex
+		* `aliases` - (Optional, List) List of aliases for the variable name.
+		* `description` - (Optional, String) Description of the meta data.
+		* `default_value` - (Optional, String) Default value for the variable, if the override value is not specified.
+		* `secure` - (Optional, Boolean) Is the variable secure or sensitive ?.
+		* `immutable` - (Optional, Boolean) Is the variable readonly ?.
+		* `hidden` - (Optional, Boolean) If true, the variable will not be displayed on UI or CLI.
+		* `options` - (Optional, List) List of possible values for this variable.  If type is integer or date, then the array of string will be  converted to array of integers or date during runtime.
+		* `min_value` - (Optional, Integer) Minimum value of the variable. Applicable for integer type.
+		* `max_value` - (Optional, Integer) Maximum value of the variable. Applicable for integer type.
+		* `min_length` - (Optional, Integer) Minimum length of the variable value. Applicable for string type.
+		* `max_length` - (Optional, Integer) Maximum length of the variable value. Applicable for string type.
+		* `matches` - (Optional, String) Regex for the variable value.
+		* `position` - (Optional, Integer) Relative position of this variable in a list.
+		* `group_by` - (Optional, String) Display name of the group this variable belongs to.
+		* `source` - (Optional, String) Source of this meta-data.
+	* `link` - (Optional, String) Reference link to the variable value By default the expression will point to self.value.
+* `command_parameter` - (Optional, String) Schematics job command parameter (playbook-name).
+* `credentials` - (Optional, List) credentials of the Action. MaxItems: 1.
+Nested scheme for **credentials**:
+	* `name` - (Optional, String) Name of the variable.
+	* `value` - (Optional, String) Value for the variable or reference to the value.
+	* `metadata` - (Optional, List) User editable metadata for the variables.
+	Nested scheme for **metadata**:
+		* `type` - (Optional, String) Type of the variable.
+		  * Constraints: Allowable values are: boolean, string, integer, date, array, list, map, complex
+		* `aliases` - (Optional, List) List of aliases for the variable name.
+		* `description` - (Optional, String) Description of the meta data.
+		* `default_value` - (Optional, String) Default value for the variable, if the override value is not specified.
+		* `secure` - (Optional, Boolean) Is the variable secure or sensitive ?.
+		* `immutable` - (Optional, Boolean) Is the variable readonly ?.
+		* `hidden` - (Optional, Boolean) If true, the variable will not be displayed on UI or CLI.
+		* `options` - (Optional, List) List of possible values for this variable.  If type is integer or date, then the array of string will be  converted to array of integers or date during runtime.
+		* `min_value` - (Optional, Integer) Minimum value of the variable. Applicable for integer type.
+		* `max_value` - (Optional, Integer) Maximum value of the variable. Applicable for integer type.
+		* `min_length` - (Optional, Integer) Minimum length of the variable value. Applicable for string type.
+		* `max_length` - (Optional, Integer) Maximum length of the variable value. Applicable for string type.
+		* `matches` - (Optional, String) Regex for the variable value.
+		* `position` - (Optional, Integer) Relative position of this variable in a list.
+		* `group_by` - (Optional, String) Display name of the group this variable belongs to.
+		* `source` - (Optional, String) Source of this meta-data.
+	* `link` - (Optional, String) Reference link to the variable value By default the expression will point to self.value.
+* `description` - (Optional, String) Action description.
+* `inventory` - (Optional, String) Target inventory record ID, used by the action or ansible playbook.
+* `location` - (Optional, String) List of locations supported by IBM Cloud Schematics service.  While creating your workspace or action, choose the right region, since it cannot be changed.  Note, this does not limit the location of the IBM Cloud resources, provisioned using Schematics.
+  * Constraints: Allowable values are: us-south, us-east, eu-gb, eu-de
+* `name` - (Required, String) The unique name of your action. The name can be up to 128 characters long and can include alphanumeric characters, spaces, dashes, and underscores. **Example** you can use the name to stop action.
+* `resource_group` - (Optional, String) Resource-group name for an action.  By default, action is created in default resource group.
+* `settings` - (Optional, List) Environment variables for the Action.
+Nested scheme for **settings**:
+	* `name` - (Optional, String) Name of the variable.
+	* `value` - (Optional, String) Value for the variable or reference to the value.
+	* `metadata` - (Optional, List) User editable metadata for the variables.
+	Nested scheme for **metadata**:
+		* `type` - (Optional, String) Type of the variable.
+		  * Constraints: Allowable values are: boolean, string, integer, date, array, list, map, complex
+		* `aliases` - (Optional, List) List of aliases for the variable name.
+		* `description` - (Optional, String) Description of the meta data.
+		* `default_value` - (Optional, String) Default value for the variable, if the override value is not specified.
+		* `secure` - (Optional, Boolean) Is the variable secure or sensitive ?.
+		* `immutable` - (Optional, Boolean) Is the variable readonly ?.
+		* `hidden` - (Optional, Boolean) If true, the variable will not be displayed on UI or CLI.
+		* `options` - (Optional, List) List of possible values for this variable.  If type is integer or date, then the array of string will be  converted to array of integers or date during runtime.
+		* `min_value` - (Optional, Integer) Minimum value of the variable. Applicable for integer type.
+		* `max_value` - (Optional, Integer) Maximum value of the variable. Applicable for integer type.
+		* `min_length` - (Optional, Integer) Minimum length of the variable value. Applicable for string type.
+		* `max_length` - (Optional, Integer) Maximum length of the variable value. Applicable for string type.
+		* `matches` - (Optional, String) Regex for the variable value.
+		* `position` - (Optional, Integer) Relative position of this variable in a list.
+		* `group_by` - (Optional, String) Display name of the group this variable belongs to.
+		* `source` - (Optional, String) Source of this meta-data.
+	* `link` - (Optional, String) Reference link to the variable value By default the expression will point to self.value.
 * `source` - (Optional, List) Source of templates, playbooks, or controls.
-  * `source_type` - (Required, string) Type of source for the Template.
-  * `git` - (Optional, ExternalSourceGit) Connection details to Git source.
-* `source_type` - (Optional, string) Type of source for the Template.
-* `command_parameter` - (Optional, string) Schematics job command parameter (playbook-name, capsule-name or flow-name).
-* `bastion` - (Optional, List) Complete target details with the user inputs and the system generated data.
-  * `name` - (Optional, string) Target name.
-  * `type` - (Optional, string) Target type (`cluster`, `vsi`, `icd`, `vpc`).
-  * `description` - (Optional, string) Target description.
-  * `resource_query` - (Optional, string) Resource selection query string.
-  * `credential` - (Optional, string) Override credential for each resource.  Reference to credentials values, used by all the resources.
-  * `id` - (Optional, string) Target ID.
-  * `created_at` - (Optional, TypeString) Targets creation time.
-  * `created_by` - (Optional, string) E-mail address of the user who created the targets.
-  * `updated_at` - (Optional, TypeString) Targets updation time.
-  * `updated_by` - (Optional, string) E-mail address of user who updated the targets.
-  * `sys_lock` - (Optional, SystemLock) System lock status.
-  * `resource_ids` - (Optional, []interface{}) Array of the resource IDs.
-* `targets_ini` - (Optional, string) Inventory of host and host group for the playbook in `INI` file format. For example, `"targets_ini": "[webserverhost]  172.22.192.6  [dbhost]  172.22.192.5"`. For more information, about an inventory host group syntax, see [Inventory host groups](/docs/schematics?topic=schematics-schematics-cli-reference#schematics-inventory-host-grps).
-* `credentials` - (Optional, List) credentials of the Action.
-  * `name` - (Optional, string) Name of the variable.
-  * `value` - (Optional, string) Value for the variable or reference to the value.
-  * `metadata` - (Optional, VariableMetadata) User editable metadata for the variables.
-  * `link` - (Optional, string) Reference link to the variable value By default the expression will point to self.value.
-* `inputs` - (Optional, List) Input variables for an action.
-  * `name` - (Optional, string) Name of the variable.
-  * `value` - (Optional, string) Value for the variable or reference to the value.
-  * `metadata` - (Optional, VariableMetadata) User editable metadata for the variables.
-  * `link` - (Optional, string) Reference link to the variable value By default the expression will point to self.value.
-* `outputs` - (Optional, List) Output variables for an action.
-  * `name` - (Optional, string) Name of the variable.
-  * `value` - (Optional, string) Value for the variable or reference to the value.
-  * `metadata` - (Optional, VariableMetadata) User editable metadata for the variables.
-  * `link` - (Optional, string) Reference link to the variable value By default the expression will point to self.value.
-* `settings` - (Optional, List) Environment variables for an action.
-  * `name` - (Optional, string) Name of the variable.
-  * `value` - (Optional, string) Value for the variable or reference to the value.
-  * `metadata` - (Optional, VariableMetadata) User editable metadata for the variables.
-  * `link` - (Optional, string) Reference link to the variable value By default the expression will point to self.value.
-* `trigger_record_id` - (Optional, string) ID to the trigger.
-* `state` - (Optional, List) Computed state of an action.
-  * `status_code` - (Optional, string) Status of automation (workspace or action).
-  * `status_message` - (Optional, string) Automation status message - to be displayed along with the status_code.
+Nested scheme for **source**:
+	* `source_type` - (Required, String) Type of source for the Template.
+	  * Constraints: Allowable values are: local, git_hub, git_hub_enterprise, git_lab, ibm_git_lab, ibm_cloud_catalog, external_scm, cos_bucket
+	* `git` - (Optional, List) Connection details to Git source.
+	Nested scheme for **git**:
+		* `computed_git_repo_url` - (Optional, String) The Complete URL which is computed by git_repo_url, git_repo_folder and branch.
+		* `git_repo_url` - (Optional, String) URL to the GIT Repo that can be used to clone the template.
+		* `git_token` - (Optional, String) Personal Access Token to connect to Git URLs.
+		* `git_repo_folder` - (Optional, String) Name of the folder in the Git Repo, that contains the template.
+		* `git_release` - (Optional, String) Name of the release tag, used to fetch the Git Repo.
+		* `git_branch` - (Optional, String) Name of the branch, used to fetch the Git Repo.
+	* `catalog` - (Optional, List) Connection details to IBM Cloud Catalog source. MaxItems:1.
+	Nested scheme for **catalog**:
+		* `catalog_name` - (Optional, String) name of the private catalog.
+		* `offering_name` - (Optional, String) Name of the offering in the IBM Catalog.
+		* `offering_version` - (Optional, String) Version string of the offering in the IBM Catalog.
+		* `offering_kind` - (Optional, String) Type of the offering, in the IBM Catalog.
+		* `offering_id` - (Optional, String) Id of the offering the IBM Catalog.
+		* `offering_version_id` - (Optional, String) Id of the offering version the IBM Catalog.
+		* `offering_repo_url` - (Optional, String) Repo Url of the offering, in the IBM Catalog.
+	* `cos_bucket` - (Optional, List) Connection details to a IBM Cloud Object Storage bucket. MaxItems: 1.
+	Nested scheme for **cos_bucket**:
+		* `cos_bucket_url` - (Optional, String) COS Bucket Url.
+* `source_readme_url` - (Optional, String) URL of the `README` file, for the source URL.
+* `source_type` - (Optional, String) Type of source for the Template.
+  * Constraints: Allowable values are: local, git_hub, git_hub_enterprise, git_lab, ibm_git_lab, ibm_cloud_catalog, external_scm, cos_bucket
+* `state` - (Optional, List) Computed state of the Action.
+Nested scheme for **state**:
+	* `status_code` - (Optional, String) Status of automation (workspace or action).
+	  * Constraints: Allowable values are: normal, pending, disabled, critical
+	* `status_job_id` - (Optional, String) Job id reference for this status.
+	* `status_message` - (Optional, String) Automation status message - to be displayed along with the status_code.
 * `sys_lock` - (Optional, List) System lock status.
-  * `sys_locked` - (Optional, bool) Is the Workspace locked by the Schematic action ?.
-  * `sys_locked_by` - (Optional, string) Name of the user who performed the action, that lead to lock the Workspace.
-  * `sys_locked_at` - (Optional, TypeString) When the user performed the action that lead to lock the Workspace ?.
-* `x_github_token` - (Optional, string) The personal access token to authenticate with your private GitHub or GitLab repository and access your Terraform template.
+Nested scheme for **sys_lock**:
+	* `sys_locked` - (Optional, Boolean) Is the automation locked by a Schematic job ?.
+	* `sys_locked_by` - (Optional, String) Name of the User who performed the job, that lead to the locking of the automation.
+	* `sys_locked_at` - (Optional, String) When the User performed the job that lead to locking of the automation ?.
+* `tags` - (Optional, List) Action tags.
+* `targets_ini` - (Optional, String) Inventory of host and host group for the playbook in `INI` file format. For example, `"targets_ini": "[webserverhost]  172.22.192.6  [dbhost]  172.22.192.5"`. For more information, about an inventory host group syntax, see [Inventory host groups](https://cloud.ibm.com/docs/schematics?topic=schematics-schematics-cli-reference#schematics-inventory-host-grps).
+* `user_state` - (Optional, List) User defined status of the Schematics object.
+Nested scheme for **user_state**:
+	* `state` - (Optional, String) User-defined states  * `draft` Object can be modified; can be used by Jobs run by the author, during execution  * `live` Object can be modified; can be used by Jobs during execution  * `locked` Object cannot be modified; can be used by Jobs during execution  * `disable` Object can be modified. cannot be used by Jobs during execution.
+	  * Constraints: Allowable values are: draft, live, locked, disable
+	* `set_by` - (Optional, String) Name of the User who set the state of the Object.
+	* `set_at` - (Optional, String) When the User who set the state of the Object.
+* `x_github_token` - (Optional, String) The personal access token to authenticate with your private GitHub or GitLab repository and access your Terraform template.
 
-## Attribute Reference
+## Attribute reference
 
-In addition to all arguments above, the following attributes are exported:
+In addition to all argument references listed, you can access the following attribute references after your resource is created.
 
 * `id` - The unique identifier of the schematics_action.
-* `crn` - Action Cloud Resource Name.
-* `account` - Action account ID.
-* `source_created_at` - Action Playbook Source creation time.
-* `source_created_by` - E-mail address of user who created the Action Playbook Source.
-* `source_updated_at` - The action playbook updation time.
-* `source_updated_by` - E-mail address of user who updated the action playbook source.
-* `created_at` - Action creation time.
-* `created_by` - E-mail address of the user who created an action.
-* `updated_at` - Action updation time.
-* `updated_by` - E-mail address of the user who updated an action.
-* `namespace` - Name of the namespace.
-* `playbook_names` - Playbook names retrieved from the respository.
+* `account` - (Optional, String) Action account ID.
+* `created_at` - (String) Action creation time.
+* `created_by` - (String) E-mail address of the user who created an action.
+* `crn` - (Optional, String) Action Cloud Resource Name.
+* `playbook_names` - (Optional, List) Playbook names retrieved from the respository.
+* `source_created_at` - (String) Action Playbook Source creation time.
+* `source_created_by` - (String) E-mail address of user who created the Action Playbook Source.
+* `source_updated_at` - (String) The action playbook updation time.
+* `source_updated_by` - (String) E-mail address of user who updated the action playbook source.
+* `updated_at` - (String) Action updation time.
+* `updated_by` - (String) E-mail address of the user who updated an action.
+
+## Import
+
+You can import the `ibm_schematics_action` resource by using `id`. Action ID.
+
+# Syntax
+```
+$ terraform import ibm_schematics_action.schematics_action <id>
+```

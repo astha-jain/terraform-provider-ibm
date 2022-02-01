@@ -6,26 +6,34 @@ description: |-
   Fetches endpoint gateway targets information.
 ---
 
-# ibm\is_endpoint_gateway_targets
+# ibm_is_endpoint_gateway_targets
+Retrieve an information of an endpoint gateway targets on IBM Cloud as a read-only data source. For more information, about VPC endpoint gateway target, see [creating an endpoint gateway](https://cloud.ibm.com/docs/vpc?topic=vpc-ordering-endpoint-gateway).
 
-Import the details of endpoint gateway targets on IBM Cloud as a read-only data source. You can then reference the fields of the data source in other resources within the same configuration using interpolation syntax.
+**Note:** 
+VPC infrastructure services are a regional specific based endpoint, by default targets to `us-south`. Please make sure to target right region in the provider block as shown in the `provider.tf` file, if VPC service is created in region other than `us-south`.
 
-## Example Usage
+**provider.tf**
 
-```hcl
-
-    data "ibm_is_endpoint_gateway_targets" "endpointGatewayTargets" {
-    }
-
+```terraform
+provider "ibm" {
+  region = "eu-gb"
+}
 ```
 
-## Attribute Reference
+## Example usage
 
-The following attributes are exported:
-* `crn` - The crn for this specific object.	
-* `name` - Display name in the requested language.
-* `parent` - The parent for this specific object. 
-* `endpoint_type` - Data endpoint type of this offering.
-* `full_qualified_domain_names` - Fully qualified domain names.
-* `resource_type` - Resource type of this offering. 
-* `service_location` - Service location of this offering.
+```terraform
+data "ibm_is_endpoint_gateway_targets" "example" {
+}
+```
+
+## Attribute reference
+You can access the following attribute references after your data source is created. 
+
+- `crn` - (String) The CRN for the specific object.	
+- `endpoint_type` - (String) The data endpoint type of the offering.
+- `full_qualified_domain_names` - (String) The fully qualified domain names.
+- `name` - (String) The display name in the requested language.
+- `parent` - (String) The parent for the specific object. 
+- `resource_type` - (String) The resource type of the offering. 
+- `service_location` - (String) The service location of the offering.

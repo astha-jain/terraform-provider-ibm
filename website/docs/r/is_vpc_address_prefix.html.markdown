@@ -4,51 +4,62 @@ subcategory: "VPC infrastructure"
 layout: "ibm"
 page_title: "IBM : vpc-address-prefix"
 description: |-
-  Manages IBM IS VPC Address prefix.
+  Manages IBM IS VPC address prefix.
 ---
 
-# ibm\_is_vpc_address_prefix
+# ibm_is_vpc_address_prefix
+Create, update, or delete an IP address prefix. For more information, about IS VPC address prefix, see [address prefixes](https://cloud.ibm.com/docs/vpc?topic=vpc-vpc-behind-the-curtain#address-prefixes).
 
-Provides a vpc address prefix resource. This allows vpc address prefix to be created, updated, and cancelled.
+**Note:** 
+VPC infrastructure services are a regional specific based endpoint, by default targets to `us-south`. Please make sure to target right region in the provider block as shown in the `provider.tf` file, if VPC service is created in region other than `us-south`.
 
+**provider.tf**
 
-## Example Usage
+```terraform
+provider "ibm" {
+  region = "eu-gb"
+}
+```
 
-```hcl
-resource "ibm_is_vpc" "testacc_vpc" {
-  name = "testvpc"
+## Example usage
+
+```terraform
+resource "ibm_is_vpc" "example" {
+  name = "example-vpc"
 }
 
-resource "ibm_is_vpc_address_prefix" "testacc_vpc_address_prefix" {
-  name = "test"
+resource "ibm_is_vpc_address_prefix" "example" {
+  name = "example-address-prefix"
   zone = "us-south-1"
-  vpc  = ibm_is_vpc.testacc_vpc.id
+  vpc  = ibm_is_vpc.example.id
   cidr = "10.240.0.0/24"
 }
 
 ```
 
-## Argument Reference
 
-The following arguments are supported:
+## Argument reference
+Review the argument references that you can specify for your resource. 
 
-* `name` - (Required, string) The address prefix name.
-* `vpc` - (Required, Forces new resource, string) The vpc id. 
-* `zone` - (Required, Forces new resource, string) Name of the zone. 
-* `cidr` - (Required, Forces new resource, string) The CIDR block for the address prefix. 
-* `is_default` - (Optional, string) Makes the prefix as default prefix for this zone in this VPC. 
+- `cidr` - (Required, Forces new resource, String) The CIDR block for the address prefix.
+- `is_default` - (Optional, String) Makes the prefix as default prefix for this zone in this VPC.
+- `name` - (Required, String) The address prefix name.No.
+- `vpc` - (Required, Forces new resource, String) The VPC ID.
+- `zone` - (Required, Forces new resource, String) The name of the zone.
 
-## Attribute Reference
 
-In addition to all arguments above, the following attributes are exported:
+## Attribute reference
+In addition to all argument reference list, you can access the following attribute reference after your resource is created.
 
-* `id` - The id of the address prefix.
-* `has_subnets` - Indicates whether subnets exist with addresses from this prefix.
+- `id` - (String) The ID of the address prefix. The ID is composed of `<vpc_id>/<address_prefix_id>`.
+- `has_subnets`- (Bool) Indicates whether subnets exist with addresses from this prefix.
+- `address_prefix` - (String) the unique identifier of the address prefix.
 
 ## Import
+The `ibm_is_vpc_address_prefix` resource can be imported by using the VPC ID and VPC address prefix ID.
 
-ibm_is_vpc_address_prefix can be imported using using VPC ID and VPC Addressprefix  ID, eg
+**Syntax**
 
 ```
-$ terraform import ibm_is_vpc_address_prefix.example d7bec597-4726-451f-8a63-e62e6f19c32c/a1aaa111-1111-111a-1a11-a11a1a11a11a
+$ terraform import ibm_is_vpc_address_prefix.example <vpc_ID>/<address_prefix_ID>
 ```

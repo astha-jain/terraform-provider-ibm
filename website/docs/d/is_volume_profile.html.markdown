@@ -6,29 +6,36 @@ description: |-
   Manages IBM Cloud virtual server volume profile.
 ---
 
-# ibm\_is_volume_profile
+# ibm_is_volume_profile
+Retrieve information of an existing IBM Cloud virtual server volume profile as a read-only data source. For more information, about virtual server volume profile, see [restoring a volume from a snapshot](https://cloud.ibm.com/docs/vpc?topic=vpc-snapshots-vpc-restore).
 
-Import the details of an existing IBM Cloud virtual server volume profile as a read-only data source. You can then reference the fields of the data source in other resources within the same configuration using interpolation syntax.
+**Note:** 
+VPC infrastructure services are a regional specific based endpoint, by default targets to `us-south`. Please make sure to target right region in the provider block as shown in the `provider.tf` file, if VPC service is created in region other than `us-south`.
 
+**provider.tf**
 
-## Example Usage
+```terraform
+provider "ibm" {
+  region = "eu-gb"
+}
+```
 
-```hcl
+## Example usage
 
-data "ibm_is_volume_profile" "volprofile"{
+```terraform
+
+data "ibm_is_volume_profile" "example" {
   name = "general-purpose"
 }
 
 ```
 
-## Argument Reference
+## Argument reference
+Review the argument references that you can specify for your data source. 
 
-The following arguments are supported:
+- `name` - (Required, String) The name for the virtual server volume profile.
 
-* `name` - (Required, string) The name for this virtual server volume profile.
+## Attribute reference
+In addition to the argument reference list, you can access the following attribute references after your data source is created. 
 
-## Attribute Reference
-
-In addition to all arguments above, the following attributes are exported:
-
-* `family` - The family of the virtual server volume profile.
+- `family` - (String) The family of the virtual server volume profile.

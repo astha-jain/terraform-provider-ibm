@@ -3,84 +3,95 @@ subcategory: "VPC infrastructure"
 layout: "ibm"
 page_title: "IBM : is_instance_disk"
 description: |-
-  Get information about InstanceDisk
+  Get information about instance disk.
 ---
 
-# ibm\_is_instance_disk
+# ibm_is_instance_disk
+Retrieve information about an instance disk. For more information about instance disk, see [managing instance storage](https://cloud.ibm.com/docs/vpc?topic=vpc-instance-storage-provisioning).
 
-Provides a read-only data source for InstanceDisk. You can then reference the fields of the data source in other resources within the same configuration using interpolation syntax.
+**Note:** 
+VPC infrastructure services are a regional specific based endpoint, by default targets to `us-south`. Please make sure to target right region in the provider block as shown in the `provider.tf` file, if VPC service is created in region other than `us-south`.
 
-## Example Usage
+**provider.tf**
 
-```hcl
-resource "ibm_is_vpc" "testacc_vpc" {
-  name = "testvpc"
+```terraform
+provider "ibm" {
+  region = "eu-gb"
+}
+```
+
+## Example usage
+
+```terraform
+resource "ibm_is_vpc" "example" {
+  name = "example-vpc"
 }
 
-resource "ibm_is_subnet" "testacc_subnet" {
-  name            = "testsubnet"
-  vpc             = ibm_is_vpc.testacc_vpc.id
+resource "ibm_is_subnet" "example" {
+  name            = "example-subnet"
+  vpc             = ibm_is_vpc.example.id
   zone            = "us-south-1"
   ipv4_cidr_block = "10.240.0.0/24"
 }
 
-resource "ibm_is_ssh_key" "testacc_sshkey" {
-  name       = "testssh"
+resource "ibm_is_ssh_key" "example" {
+  name       = "example-ssh"
   public_key = file("~/.ssh/id_rsa.pub")
 }
 
-resource "ibm_is_instance" "testacc_instance" {
-  name    = "testinstance"
-  image   = "a7a0626c-f97e-4180-afbe-0331ec62f32a"
+resource "ibm_is_image" "example" {
+  name               = "example-image"
+  href               = "cos://us-south/buckettesttest/livecd.ubuntu-cpc.azure.vhd"
+  operating_system   = "ubuntu-16-04-amd64"
+  encrypted_data_key = "eJxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx0="
+  encryption_key     = "crn:v1:bluemix:public:kms:us-south:a/6xxxxxxxxxxxxxxx:xxxxxxx-xxxx-xxxx-xxxxxxx:key:dxxxxxx-fxxx-4xxx-9xxx-7xxxxxxxx"
+
+}
+
+resource "ibm_is_instance" "example" {
+  name    = "example-instance"
+  image   = ibm_is_image.example.id
   profile = "bc1-2x8"
 
   primary_network_interface {
-    subnet = ibm_is_subnet.testacc_subnet.id
+    subnet = ibm_is_subnet.example.id
   }
 
   network_interfaces {
     name   = "eth1"
-    subnet = ibm_is_subnet.testacc_subnet.id
+    subnet = ibm_is_subnet.example.id
   }
 
-  vpc  = ibm_is_vpc.testacc_vpc.id
+  vpc  = ibm_is_vpc.example.id
   zone = "us-south-1"
-  keys = [ibm_is_ssh_key.testacc_sshkey.id]
+  keys = [ibm_is_ssh_key.example.id]
 }
 
-data "ibm_is_instance" "ds_instance" {
-  name        = "${ibm_is_instance.testacc_instance.name}"
+data "ibm_is_instance" "example" {
+  name        = "ibm_is_instance.example.name"
   private_key = file("~/.ssh/id_rsa")
   passphrase  = ""
 }
 
-data "is_instance_disk" "is_instance_disk" {
-  instance = data.ibm_is_instance.ds_instance.id
-  disk = data.ibm_is_instance.ds_instance.disks.0.id
+data "is_instance_disk" "example" {
+  instance = data.ibm_is_instance.example.id
+  disk     = data.ibm_is_instance.example.disks.0.id
 }
 ```
 
-## Argument Reference
+## Argument reference
+Review the argument references that you can specify for your data source. 
 
-The following arguments are supported:
+- `instance` - (Required, String) The instance identifier.
+- `disk` - (Required, String) The instance disk identifier.
 
-* `instance` - (Required, string) The instance identifier.
-* `disk` - (Required, string) The instance disk identifier.
+## Attribute reference
+In addition to all argument reference list, you can access the following attribute references after your data source is created. 
 
-## Attribute Reference
-
-The following attributes are exported:
-
-* `id` - The unique identifier of the InstanceDisk.
-* `created_at` - The date and time that the disk was created.
-
-* `href` - The URL for this instance disk.
-
-* `interface_type` - The disk interface used for attaching the disk.The enumerated values for this property are expected to expand in the future. When processing this property, check for and log unknown values. Optionally halt processing and surface the error, or bypass the resource on which the unexpected property value was encountered.
-
-* `name` - The user-defined name for this disk.
-
-* `resource_type` - The resource type.
-
-* `size` - The size of the disk in GB (gigabytes).
-
+- `created_at` - (Timestamp) The date and time that the disk was created.
+- `href` - (String) The URL for this instance disk.
+- `id` - (String) The unique identifier of the instance disk.
+- `interface_type` - (String) The disk interface used for attaching the disk. The enumerated values for this property are expected to expand in the future. When processing this property, check for and log unknown values. Optionally, halt processing and surface the error, or bypass the resource on which the unexpected property value is used.
+- `name` - (String) The user defined name for this disk.
+- `resource_type` - (String) The resource type.
+- `size` - (String) The size of the disk in GB (gigabytes).

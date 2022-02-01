@@ -186,3 +186,58 @@ data "ibm_dns_glbs" "test1" {
   instance_id = ibm_resource_instance.test-pdns-instance.guid
   zone_id     = ibm_dns_zone.test-pdns-zone.zone_id
 }
+
+resource "ibm_dns_custom_resolver" "test" {
+  name        = "testCR-TF"
+  instance_id = ibm_resource_instance.test-pdns-instance.guid
+  description = "testdescription-CR"
+  locations {
+    subnet_crn  = "crn:v1:staging:public:is:us-south-1:a/01652b251c3ae2787110a995d8db0135::subnet:0716-6c3a997d-72b2-47f6-8788-6bd95e1bdb03"
+    enabled     = false
+  }
+}
+resource "ibm_dns_custom_resolver" "test" {
+  name            = "testCR-TF-New"
+  instance_id     = ibm_resource_instance.test-pdns-instance.guid
+  description     = "new test CR TF-1"
+  high_availability = true
+  enabled       = true
+  locations {
+    subnet_crn = "crn:v1:staging:public:is:us-south-1:a/01652b251c3ae2787110a995d8db0135::subnet:0716-a094c4e8-02cd-4b04-858d-3432"
+    enabled     = false
+  } 
+  locations {
+    subnet_crn  = "crn:v1:staging:public:is:us-south-2:a/01652b251c3ae2787110a995d8db0135::subnet:0726-b6f3cb83-48f0-4c55-9023-433"
+    enabled     = false
+  }
+}
+
+data "ibm_dns_custom_resolvers" "test-cr" {
+		instance_id = ibm_dns_custom_resolver.test.instance_id
+}
+
+output "ibm_dns_custom_resolvers_output" {
+  value = data.ibm_dns_custom_resolvers.test-cr.custom_resolvers
+}
+
+resource "ibm_dns_custom_resolver_location" "test" {
+  instance_id   = ibm_resource_instance.test-pdns-instance.guid
+  resolver_id   = ibm_dns_custom_resolver.test.custom_resolver_id
+  subnet_crn    = "crn:v1:staging:public:is:us-south-1:a/01652b251c3ae2787110a995d8db0135::subnet:0716-a094c4e8-02cd-4b04-858d-343"
+  enabled       = true
+  cr_enabled    = true
+} 
+
+resource "ibm_dns_custom_resolver_forwarding_rule" "test" {
+  instance_id = ibm_resource_instance.test-pdns-instance.guid
+  resolver_id = ibm_dns_custom_resolver.test.custom_resolver_id
+  description = "test forward rule"
+  type = "zone"
+  match = "test.example.com"
+  forward_to = ["168.20.22.122"]
+}
+
+data "ibm_dns_custom_resolver_forwarding_rules" "test-fr" {
+		instance_id	= ibm_dns_custom_resolver.test.instance_id
+		resolver_id = ibm_dns_custom_resolver.test.custom_resolver_id
+}

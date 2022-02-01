@@ -29,6 +29,7 @@ resource "ibm_cis_domain_settings" "web_domain" {
   waf             = "on"
   ssl             = "full"
   min_tls_version = "1.2"
+  brotli					= "on"
 }
 
 #Adding valid Domain for IBM CIS instance
@@ -126,6 +127,36 @@ data "ibm_cis_firewall" "ua_rules" {
   domain_id     = ibm_cis_domain.web_domain.id
   firewall_type = "ua_rules"
 }
+# CIS Filter
+resource "ibm_cis_filter" "test" {
+  cis_id          = ibm_cis.web_domain.id
+  domain_id       = ibm_cis_domain.web_domain.id
+  expression = "(ip.src eq 19.25.53.139 and http.request.uri.path eq \"^.*/wp-login[0-5].php$\") or (http.request.uri.path eq \"^.*/xmlrpc[[:xdigit:]].php$\")"
+  paused =  false
+  description = "Filter-creation"
+}
+# CIS Filter data source
+data "ibm_cis_filters" "test" {
+  cis_id    = data.ibm_cis_filters.test.cis_id
+  domain_id = data.ibm_cis_filters.test.domain_id
+}
+
+# CIS Firewall Rules Resource
+resource "ibm_cis_firewall_rule" "firewall_rules_instance" {
+  cis_id = ibm_cis.web_domain.id
+  domain_id = ibm_cis_domain.web_domain.id
+  filter_id = ibm_cis_filter.test.filter_id
+  action = "allow"
+  priority = 5
+  description = "Firewallrules-creation"
+
+}
+# CIS Firewall Rules data source
+data "ibm_cis_firewall_rules" "test" {
+  cis_id    = data.ibm_cis_firewall_rules.test.cis_id
+  domain_id = data.ibm_cis_firewall_rules.test.domain_id
+ }
+
 
 #CIS Rate Limit
 resource "ibm_cis_rate_limit" "ratelimit" {

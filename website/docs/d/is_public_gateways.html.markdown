@@ -3,34 +3,46 @@ subcategory: "VPC infrastructure"
 layout: "ibm"
 page_title: "IBM : public_gateways"
 description: |-
-  Manages IBM Public Gateways.
+  Manages IBM public gateways.
 ---
 
-# ibm\_is_public_gateways
+# ibm_is_public_gateways
+Retrieve information of an existing public gateways as a read only data source. For more information, about an VPC public gateway, see [about networking](https://cloud.ibm.com/docs/vpc?topic=vpc-about-networking-for-vpc).
 
-Import the details of an existing IBM Cloud Infrastructure Public Gateways as a read-only data source. You can then reference the fields of the data source in other resources within the same configuration using interpolation syntax.
+**Note:** 
+VPC infrastructure services are a regional specific based endpoint, by default targets to `us-south`. Please make sure to target right region in the provider block as shown in the `provider.tf` file, if VPC service is created in region other than `us-south`.
 
+**provider.tf**
 
+```terraform
+provider "ibm" {
+  region = "eu-gb"
+}
+```
 
-## Example Usage
+## Example usage
 
-```hcl
-data "ibm_is_public_gateways" "testacc_dspgw"{
+```terraform
+data "ibm_is_public_gateways" "example"{
 }
 
 ```
 
-## Attribute Reference
+## Attribute reference
+Review the attribute references that you can access after you retrieve your data source.
 
-The following attributes are exported:
-* `public_gateways` - List of all Public Gateways in the IBM Cloud Infrastructure region.
-  * `id` - The id of the public gateway.
-  * `status` - The status of the gateway.
-  * `vpc` - The vpc id of gateway.
-  * `zone` - The gateway zone name.
-  * `tags` - Tags associated with the Public gateway.
-  * `name` - The name of the public gateway.
-  * `floating_ip` - A nested block describing the floating IP of this gateway.
-  Nested `floating_ip` blocks have the following structure:
-    * `id` - ID of the floating ip bound to the public gateway.
-    * `address` - IP address of the floating ip bound to the public gateway.
+- `public_gateways` - (List) List of all Public Gateways in the IBM Cloud infrastructure region.
+
+  Nested scheme for `public_gateways`:
+  - `crn` - (String) The CRN for this public gateway.
+  - `id` - (String) The ID of the public gateway.
+  - `status` - (String) The status of the public gateway.
+  - `vpc` - (String) The VPC ID of the public gateway.
+  - `zone` - (String) The public gateway zone name.
+  - `tags` - (String) Tags associated with the public gateway.
+  - `name` - (String) The name of the public gateway.
+  - `floating_ip` - (List) A nested block describing the floating IP of the public gateway.
+  
+    Nested scheme for `floating_ip`:
+    - `id` - (String) ID of the floating ip bound to the public gateway.
+    - `address` - (String) IP address of the floating ip bound to the public gateway.

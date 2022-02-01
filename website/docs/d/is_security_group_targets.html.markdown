@@ -4,36 +4,46 @@ subcategory: "VPC infrastructure"
 layout: "ibm"
 page_title: "IBM : ibm_is_security_group_targets"
 description: |-
-  Manages IBM Security Group Targets
+  Manages IBM Cloud security group targets.
 ---
 
-# ibm_is_security_group_target
+# ibm_is_security_group_targets
+Retrieve information of an existing security group targets as a read only data source. For more information, about security group targets, see [required permissions](https://cloud.ibm.com/docs/vpc?topic=vpc-resource-authorizations-required-for-api-and-cli-calls).
 
-This request lists all targets associated with a security group, to which the rules in the security group are applied.
+**Note:** 
+VPC infrastructure services are a regional specific based endpoint, by default targets to `us-south`. Please make sure to target right region in the provider block as shown in the `provider.tf` file, if VPC service is created in region other than `us-south`.
 
-## Example Usage
+**provider.tf**
 
-In the following example, you can create a security group target:
-
-```hcl
-data "ibm_is_security_group_targets" "testacc_security_group_targets" {
-    security_group = ibm_is_security_group.testacc_security_group.id
-  }
+```terraform
+provider "ibm" {
+  region = "eu-gb"
+}
 ```
 
-## Argument Reference
+## Example usage
+In the following example, you can create a security group target:
 
-The following arguments are supported:
+```terraform
+data "ibm_is_security_group_targets" "example" {
+  security_group = ibm_is_security_group.example.id
+}
+```
 
-- `security_group` - (Required, string) The security group identifier
+## Argument reference
+Review the argument references that you can specify for your data source.
 
-## Attribute Reference
+- `security_group` - (Required, String) The security group identifier
 
-The following attributes are exported:
+## Attribute reference
+In addition to all argument reference list, you can access the following attribute references after your data source is created. 
 
-- `id` - The unique identifier of the security group target <`security_group`>
-- `targets` - Collection of security group target references
-    - `target` - The unique identifier for this load balancer/network interface
-    - `name` - The user-defined name of the target
-    - `resource_type` - The resource type
-    - `more_info` - Link to documentation about deleted resources
+- `id` - (String) The unique identifier of the security group target <`security_group`>
+- `targets` - (List) Collection of security group target references
+
+  Nested scheme for `targets`:
+  - `crn` - (String) The CRN for this target.
+  - `target` - (String) The unique identifier for this load balancer/network interface.
+  - `name` - (String) The user-defined name of the target.
+  - `resource_type` - (String) The resource type.
+  - `more_info` - (String) Link to documentation about deleted resources.

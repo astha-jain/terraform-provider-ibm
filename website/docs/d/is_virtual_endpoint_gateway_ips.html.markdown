@@ -3,39 +3,50 @@ subcategory: "VPC infrastructure"
 layout: "ibm"
 page_title: "IBM : ibm_is_virtual_endpoint_gateway_ips"
 description: |-
-  Manages IBM Cloud Infrastructure virtual endpoint gateway ips.
+  Manages IBM Cloud infrastructure virtual endpoint gateway IPs.
 ---
 
 # ibm_is_virtual_endpoint_gateway_ips
+Retrieve information of an existing IBM Cloud infrastructure virtual endpoint gateway IPs as a read only data source.  For more information, about the VPC endpoint gateways, see [about VPC gateways](https://cloud.ibm.com/docs/vpc?topic=vpc-about-vpe).
 
-Import the details of an existing IBM Cloud Infrastructure virtual endpoint gateway ips as a read-only data source. You can then reference the fields of the data source in other resources within the same configuration using interpolation syntax.
+**Note:** 
+VPC infrastructure services are a regional specific based endpoint, by default targets to `us-south`. Please make sure to target right region in the provider block as shown in the `provider.tf` file, if VPC service is created in region other than `us-south`.
 
-## Example Usage
+**provider.tf**
 
-```hcl
-data "ibm_is_virtual_endpoint_gateway_ips" "data_test1" {
-  gateway = ibm_is_virtual_endpoint_gateway.endpoint_gateway.id
+```terraform
+provider "ibm" {
+  region = "eu-gb"
 }
 ```
 
-## Argument Reference
+## Example usage
 
-The following arguments are supported:
+```terraform
+data "ibm_is_virtual_endpoint_gateway_ips" "example" {
+  gateway = ibm_is_virtual_endpoint_gateway.example.id
+}
+```
 
-- `gateway`(Required,string)- Endpoint gateway ID
+## Argument reference
+Review the argument references that you can specify for your data source. 
 
-## Attribute Reference
+- `gateway` - (Required, String) The endpoint gateway ID.
 
-In addition to all arguments above, the following attributes are exported:
+## Attribute reference
+In addition to all argument reference list, you can access the following attribute references after your data source is created. 
 
-- `ips` - Endpoint gateway reserved IP id
-- `reserved_ip` - Endpoint gateway IP id
-- `name` - Endpoint gateway IP name
-- `resource_type` - Endpoint gateway IP resource type
-- `created_at` - Endpoint gateway created date and time
-- `auto_delete` - Endpoint gateway IP auto delete
-- `address` - Endpoint gateway IP address
-- `target` - Endpoint gateway detail
-  - `id` - The IPs target id
-  - `name` - The IPs target name
-  - `resource_type` - Endpoint gateway resource type
+- `address` - (String) The endpoint gateway IP address.
+- `auto_delete` - (String) The endpoint gateway IP auto delete.
+- `created_at` - (Timestamp) The created date and time of the endpoint gateway IP.
+- `id` - (String) The endpoint gateway reserved IP ID.
+- `ips` - (String) Endpoint gateway reserved IP id
+- `name` - (String) The endpoint gateway IP name.
+- `reserved_ip` - (String) The endpoint gateway reserved IP ID.
+- `resource_type` - (String) The endpoint gateway IP resource type.
+- `target` - (List) The endpoint gateway target details.
+
+  Nested scheme for `target`:
+	- `id` - (String) The IPs target ID.
+	- `name` - (String) The IPs target name.
+	- `resource_type` - (String) The endpoint gateway resource type.

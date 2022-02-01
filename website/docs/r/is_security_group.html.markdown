@@ -4,57 +4,67 @@ subcategory: "VPC infrastructure"
 layout: "ibm"
 page_title: "IBM : security_group"
 description: |-
-  Manages IBM Security Group.
+  Manages IBM Cloud Security Group.
 ---
 
-# ibm\_is_security_group
+# ibm_is_security_group
+Create, delete, and update a security group. Provides a networking security group resource that controls access to the public and private interfaces of a virtual server instance. To create rules for the security group, use the `is_security_group_rule` resource. For more information, about security group, see API Docs(https://cloud.ibm.com/docs/vpc?topic=vpc-using-security-groups).
 
-Provides a security group resource. This allows security group to be created, updated, and cancelled.
+**Note:** 
+VPC infrastructure services are a regional specific based endpoint, by default targets to `us-south`. Please make sure to target right region in the provider block as shown in the `provider.tf` file, if VPC service is created in region other than `us-south`.
 
+**provider.tf**
 
-## Example Usage
-
-```hcl
-resource "ibm_is_vpc" "testacc_vpc" {
-  name = "test"
-}
-
-resource "ibm_is_security_group" "testacc_security_group" {
-  name = "test"
-  vpc  = ibm_is_vpc.testacc_vpc.id
+```terraform
+provider "ibm" {
+  region = "eu-gb"
 }
 ```
 
-## Argument Reference
+## Example usage
 
-The following arguments are supported:
+```terraform
+resource "ibm_is_vpc" "example" {
+  name = "example-vpc"
+}
 
-* `name` - (Optional, string) The security group name.
-* `vpc` - (Required, Forces new resource, string) The vpc id. 
-* `resource_group` - (Optional, Forces new resource, string) The resource group ID where the security group to be created.
-* `tags` - (Optional, list(string)) Tags associated with the instance.
+resource "ibm_is_security_group" "example" {
+  name = "example-security-group"
+  vpc  = ibm_is_vpc.example.id
+}
+```
 
-## Attribute Reference
 
-In addition to all arguments above, the following attributes are exported:
+## Argument reference
+Review the argument references that you can specify for your resource. 
 
-* `id` - The id of the security group.
-* `rules` - A nested block describing the rules of this security group.
-Nested `rules` blocks have the following structure:
-  * `direction` -  The direction of the traffic either `inbound` or `outbound`.
-  * `ip_version` - IP version either `ipv4` or `ipv6`.
-  * `remote` - Security group id - an IP address, a CIDR block, or a single security group identifier.
-  * `protocol` - The type of the protocol `all`, `icmp`, `tcp`, `udp`. 
-  * `type` - The ICMP traffic type to allow.
-  * `code` - The ICMP traffic code to allow.
-  * `port_max` - The inclusive upper bound of TCP/UDP port range.
-  * `port_min` - The inclusive lower bound of TCP/UDP port range. 
-* `crn` - The CRN of the security group. 
+- `name` - (Optional, String) The security group name.
+- `resource_group` - (Optional, String) The resource group ID where the security group to be created.
+- `tags`- (Optional, List of Strings) The tags associated with an instance.
+- `vpc` - (Required, Forces new resource, String) The VPC ID.
+
+## Attribute reference
+In addition to all argument reference list, you can access the following attribute reference after your resource is created.
+
+- `crn` - (String) The CRN of the security group.
+- `id` - (String) The ID of the security group.
+- `rules` - (List of Objects) A nested block describes the rules of this security group. Nested `rules` blocks have the following structure.
+
+  Nested scheme for `rules`:
+  - `code` - (String) The `ICMP` traffic code to allow.
+  - `direction`-  (String) The direction of the traffic either `inbound` or `outbound`.
+  - `ip_version` - (String) IP version: `ipv4`
+  - `protocol` - (String) The type of the protocol `all`, `icmp`, `tcp`, `udp`.
+  - `port_max`- (Integer) The `TCP/UDP` port range that includes the maximum bound.
+  - `port_min`- (Integer) The `TCP/UDP` port range that includes the minimum bound.
+  - `remote` - (String) Security group id, an IP address, a `CIDR` block, or a single security group identifier.
+  - `type` - (String) The `ICMP` traffic type to allow.
 
 ## Import
+The `ibm_is_security_group` resource can be imported by using load balancer ID. 
 
-ibm_is_security_group can be imported using lbID, eg
+**Example**
 
 ```
-$ terraform import ibm_is_security_group.example d7bec597-4726-451f-8a63-e62e6f19c32c
+$ terraform import ibm_is_security_group.example a1aaa111-1111-111a-1a11-a11a1a11a11a
 ```

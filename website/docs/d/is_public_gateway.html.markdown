@@ -3,51 +3,60 @@ subcategory: "VPC infrastructure"
 layout: "ibm"
 page_title: "IBM : public_gateway"
 description: |-
-  Manages IBM Public Gateway.
+  Manages IBM Cloud public gateway.
 ---
 
-# ibm\_is_public_gateway
+# ibm_is_public_gateway
+Retrieve information of an existing public gateway data source as a read only data source. For more information, about an VPC public gateway, see [about networking](https://cloud.ibm.com/docs/vpc?topic=vpc-about-networking-for-vpc).
 
-Provides a public gateway datasource. This allows to fetch an existing gateway.
+**Note:** 
+VPC infrastructure services are a regional specific based endpoint, by default targets to `us-south`. Please make sure to target right region in the provider block as shown in the `provider.tf` file, if VPC service is created in region other than `us-south`.
+
+**provider.tf**
+
+```terraform
+provider "ibm" {
+  region = "eu-gb"
+}
+```
 
 
-## Example Usage
+## Example usage
 
-```hcl
-resource "ibm_is_vpc" "testacc_vpc" {
-  name = "test"
+```terraform
+resource "ibm_is_vpc" "example" {
+  name = "example-vpc"
 }
 
-resource "ibm_is_public_gateway" "testacc_gateway" {
-  name = "test-gateway"
-  vpc  = ibm_is_vpc.testacc_vpc.id
+resource "ibm_is_public_gateway" "example" {
+  name = "example-gateway"
+  vpc  = ibm_is_vpc.example.id
   zone = "us-south-1"
 }
 
-data "ibm_is_public_gateway" "testacc_dspgw"{
-  name = ibm_is_public_gateway.testacc_public_gateway.name
+data "ibm_is_public_gateway" "example" {
+  name = ibm_is_public_gateway.example.name
 }
-
 ```
 
-## Argument Reference
+## Argument reference
+Review the argument references that you can specify for your data source. 
+ 
+- `name` - (Required, String) The name of the gateway.
+- `resource_group` - (Optional, String) The resource group ID of the public gateway. **Note** This parameter is supported only for VPC Generation 2 infrastructure.
 
-The following arguments are supported:
+## Attribute reference
+In addition to all argument reference list, you can access the following attribute references after your data source is created. 
 
-* `name` - (Required, string) The name of the gateway.
-* `resource_group` - (Optional, string) The resource group ID of the Public gateway. (This argument is supported only for Generation `2` infrastructure)
-
-## Attribute Reference
-
-In addition to all arguments above, the following attributes are exported:
-
-* `id` - The id of the public gateway.
-* `status` - The status of the gateway.
-* `vpc` - The vpc id of gateway.
-* `zone` - The gateway zone name.
-* `tags` - Tags associated with the Public gateway.
-* `name` - The name of the public gateway
-* `floating_ip` - A nested block describing the floating IP of this gateway.
-Nested `floating_ip` blocks have the following structure:
-  * `id` - ID of the floating ip bound to the public gateway.
-  * `address` - IP address of the floating ip bound to the public gateway.
+- `crn` - (String) The CRN for this public gateway.
+- `floating_ip` - (List) List of the nested block describes the floating IP of the gateway with the **id** and **address** details.
+	
+  Nested scheme for `floating_ip`:
+  - `id` - (String) The ID of the floating IP that is bound to the public gateway.
+  - `address` - (String) The IP address of the floating IP that is bound to the public gateway.
+- `id` - (String) The ID of the public gateway.
+- `name` - (String) The name of the public gateway.
+- `status` - (String) The status of the gateway.
+- `tags` - (String) Tags associated with the Public gateway.
+- `vpc` - (String) The VPC ID of the gateway.
+- `zone` - (String) The public gateway zone name.

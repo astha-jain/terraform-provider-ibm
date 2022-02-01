@@ -6,7 +6,7 @@ description: |-
   Manages IBM Direct Link Gateway.
 ---
 
-# `ibm_dl_gateway`
+# ibm_dl_gateway
 
 Create, update, or delete a Direct Link Gateway by using the Direct Link Gateway resource. For more information, see [about Direct Link](https://cloud.ibm.com/docs/dl?topic=dl-dl-about).
 
@@ -14,7 +14,7 @@ Create, update, or delete a Direct Link Gateway by using the Direct Link Gateway
 ## Example usage to create Direct Link of dedicated type
 In the following example, you can create Direct Link of dedicated type:
 
-```
+```terraform
 data "ibm_dl_routers" "test_dl_routers" {
 		offering_type = "dedicated"
 		location_name = "dal10"
@@ -40,7 +40,7 @@ resource ibm_dl_gateway test_dl_gateway {
 In the following example, you can create Direct Link of connect type:
 
 
-```
+```terraform
 data "ibm_dl_ports" "test_ds_dl_ports" {
  
  }
@@ -56,13 +56,17 @@ resource "ibm_dl_gateway" "test_dl_connect" {
 ```
 
 ## Argument reference
-Review the input parameters that you can specify for your resource. 
+Review the argument reference that you can specify for your resource. 
 
-- `bgp_asn`- (Required, Forces new resource, Integer) The BGP ASN of the gateway to be created. For example, `64999`.
+- `authentication_key` - (Optional, String) BGP MD5 authentication key.
+- `bfd_interval` - (String) Minimum interval in milliseconds at which the local routing device transmits hello packets and then expects to receive a reply from a neighbor with which it has established a BFD session.
+- `bfd_multiplier` - (String) The number of hello packets not received by a neighbor that causes the originating interface to be declared down.
+- `bgp_asn`- (Required, Integer) The BGP ASN of the gateway to be created. For example, `64999`.
 - `bgp_base_cidr` - (Optional, String) (Deprecated) The BGP base CIDR of the gateway to be created. See `bgp_ibm_cidr` and `bgp_cer_cidr` for details on how to create a gateway by using  automatic or explicit IP assignment. Any `bgp_base_cidr` value set will be ignored.
-- `bgp_cer_cidr` - (Optional, Forces new resource, String) The BGP customer edge router CIDR. Specify a value within `bgp_base_cidr`.  For auto IP assignment, omit `bgp_cer_cidr` and `bgp_ibm_cidr`. IBM will automatically select values for `bgp_cer_cidr` and `bgp_ibm_cidr`.
-- `bgp_ibm_cidr` - (Optional, Forces new resource, String) The BGP IBM CIDR. For auto IP assignment, omit `bgp_cer_cidr` and `bgp_ibm_cidr`. IBM will automatically select values for `bgp_cer_cidr` and `bgp_ibm_cidr`.
+- `bgp_cer_cidr` - (Optional, String) The BGP customer edge router CIDR. Specify a value within `bgp_base_cidr`.  For auto IP assignment, omit `bgp_cer_cidr` and `bgp_ibm_cidr`. IBM will automatically select values for `bgp_cer_cidr` and `bgp_ibm_cidr`.
+- `bgp_ibm_cidr` - (Optional, String) The BGP IBM CIDR. For auto IP assignment, omit `bgp_cer_cidr` and `bgp_ibm_cidr`. IBM will automatically select values for `bgp_cer_cidr` and `bgp_ibm_cidr`.
 - `carrier_name` - (Required, Forces new resource, String) The carrier name is required for `dedicated` type. Constraints are 1 ≤ length ≤ 128, Value must match regular expression ^[a-z][A-Z][0-9][ -_]$. For example, `myCarrierName`.
+- `connection_mode` - (Optional, String) Type of network connection that you want to bind to your direct link. Allowed values are `direct` and `transit`.
 - `cross_connect_router` - (Required, Forces new resource, String) The cross connect router required for `dedicated` type. For example, `xcr01.dal03`.
 - `customer_name` - (Required, Forces new resource, String) The customer name is required for `dedicated` type. Constraints are 1 ≤ length ≤ 128, Value must match regular expression ^[a-z][A-Z][0-9][ -_]$. For example, `newCustomerName`.
 - `global`- (Bool) Required-Gateway with global routing as **true** can connect networks outside your associated region.
@@ -75,8 +79,9 @@ Review the input parameters that you can specify for your resource.
 - `type` - (Required, Forces new resource, String) The gateway type, allowed values are `dedicated` and `connect`.
 
 ## Attribute reference
-Review the output parameters that you can access after your resource is created. 
-
+In addition to all argument references list, you can access the following attribute references after your resource is created.
+- `bfd_status` - (String) Gateway BFD status
+- `bfd_status_updated_at` - (String) Date and time BFD status was updated at
 - `bgp_asn` - (String) The IBM BGP ASN.
 - `bgp_status` - (String) The gateway BGP status.
 - `completion_notice_reject_reason` - (String) The reason for completion notice rejection.
@@ -97,11 +102,17 @@ The `Operational_status(Gateway operational status)` and `loa_reject_reason(LOA 
 
 
 ## Import
-The `ibm_dl_gateway` can be imported by using gateway ID. 
+The `ibm_dl_gateway` resource can be imported by using gateway ID. 
+
+**Syntax**
+
+```
+$ terraform import ibm_dl_gateway.example <gateway_ID>
+```
 
 **Example**
 
 ```
-terraform import ibm_dl_gateway.example 5ffda12064634723b079acdb018ef308
+$ terraform import ibm_dl_gateway.example 5ffda12064634723b079acdb018ef308
 ```
 

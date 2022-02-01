@@ -4,50 +4,52 @@ subcategory: "Identity & Access Management (IAM)"
 layout: "ibm"
 page_title: "IBM : iam_service_policy"
 description: |-
-  Manages IBM IAM Service Policy.
+  Manages IBM IAM service policy.
 ---
 
-# ibm\_iam_service_policy
+# ibm_iam_service_policy
 
-Provides a resource for IAM Service Policy. This allows service policy  to be created, updated and deleted.
+Create, update, or delete an IAM service policy. For more information, about IAM role action, see [managing access to resources](https://cloud.ibm.com/docs/account?topic=account-assign-access-resources).
 
-## Example Usage
+## Example usage
 
-### Service Policy for All Identity and Access enabled services 
+### Service policy for all Identity and Access enabled services 
 
-```hcl
-resource "ibm_iam_service_id" "serviceID" {
+```terraform
+resource "ibm_iam_service_id" "service_id" {
   name = "test"
 }
 
 resource "ibm_iam_service_policy" "policy" {
-  iam_service_id = ibm_iam_service_id.serviceID.id
+  iam_service_id = ibm_iam_service_id.service_id.id
   roles          = ["Viewer"]
+  description    = "IAM Service Policy"
 }
 
 ```
 
 ### Service Policy using service with region
 
-```hcl
-resource "ibm_iam_service_id" "serviceID" {
+```terraform
+resource "ibm_iam_service_id" "service_id" {
   name = "test"
 }
 
 resource "ibm_iam_service_policy" "policy" {
-  iam_service_id = ibm_iam_service_id.serviceID.id
-  roles          = ["Viewer"]
+  iam_service_id = ibm_iam_service_id.service_id.id
+  roles          = ["Viewer", "Manager"]
 
   resources {
-    service = "cloud-object-storage"
+    service = "cloudantnosqldb"
+    region  = "us-south"
   }
 }
 
 ```
-### Service Policy using resource instance 
+### Service policy by using resource instance 
 
-```hcl
-resource "ibm_iam_service_id" "serviceID" {
+```terraform
+resource "ibm_iam_service_id" "service_id" {
   name = "test"
 }
 
@@ -59,7 +61,7 @@ resource "ibm_resource_instance" "instance" {
 }
 
 resource "ibm_iam_service_policy" "policy" {
-  iam_service_id = ibm_iam_service_id.serviceID.id
+  iam_service_id = ibm_iam_service_id.service_id.id
   roles          = ["Manager", "Viewer", "Administrator"]
 
   resources {
@@ -68,13 +70,12 @@ resource "ibm_iam_service_policy" "policy" {
   }
 }
 
-
 ```
 
-### Service Policy using resource group 
+### Service policy by using resource group 
 
-```hcl
-resource "ibm_iam_service_id" "serviceID" {
+```terraform
+resource "ibm_iam_service_id" "service_id" {
   name = "test"
 }
 
@@ -83,7 +84,7 @@ data "ibm_resource_group" "group" {
 }
 
 resource "ibm_iam_service_policy" "policy" {
-  iam_service_id = ibm_iam_service_id.serviceID.id
+  iam_service_id = ibm_iam_service_id.service_id.id
   roles          = ["Viewer"]
 
   resources {
@@ -94,10 +95,10 @@ resource "ibm_iam_service_policy" "policy" {
 
 ```
 
-### Service Policy using resource and resource type 
+### Service policy by using resource and resource type 
 
-```hcl
-resource "ibm_iam_service_id" "serviceID" {
+```terraform
+resource "ibm_iam_service_id" "service_id" {
   name = "test"
 }
 
@@ -106,7 +107,7 @@ data "ibm_resource_group" "group" {
 }
 
 resource "ibm_iam_service_policy" "policy" {
-  iam_service_id = ibm_iam_service_id.serviceID.id
+  iam_service_id = ibm_iam_service_id.service_id.id
   roles          = ["Administrator"]
 
   resources {
@@ -117,10 +118,10 @@ resource "ibm_iam_service_policy" "policy" {
 
 ```
 
-### Service Policy using attributes 
+### Service policy by using attributes 
 
-```hcl
-resource "ibm_iam_service_id" "serviceID" {
+```terraform
+resource "ibm_iam_service_id" "service_id" {
   name = "test"
 }
 
@@ -129,7 +130,7 @@ data "ibm_resource_group" "group" {
 }
 
 resource "ibm_iam_service_policy" "policy" {
-  iam_service_id = ibm_iam_service_id.serviceID.id
+  iam_service_id = ibm_iam_service_id.service_id.id
   roles          = ["Administrator"]
 
   resources {
@@ -142,14 +143,14 @@ resource "ibm_iam_service_policy" "policy" {
 }
 
 ```
-### Cross account Service policy using iam_id
+### Cross account service policy by using `iam_id`
 
-```hcl
+```terraform
 provider "ibm" {
     alias             = "accA"
     ibmcloud_api_key  = "Account A Api Key"
 }
-resource "ibm_iam_service_id" "serviceID" {
+resource "ibm_iam_service_id" "service_id" {
   provider = ibm.accA
   name     = "test"
 }
@@ -160,7 +161,7 @@ provider "ibm" {
 }
 resource "ibm_iam_service_policy" "policy" {
   provider       =  ibm.accB
-  iam_id         =  ibm_iam_service_id.serviceID.iam_id
+  iam_id         =  ibm_iam_service_id.service_id.iam_id
   roles          =  ["Reader"]
   resources {
     service = "cloud-object-storage"
@@ -169,14 +170,14 @@ resource "ibm_iam_service_policy" "policy" {
 
 ```
 
-### Service Policy using resource_attributes
+### Service policy by using resource_attributes
 
-```hcl
-resource "ibm_iam_service_id" "serviceID" {
+```terraform
+resource "ibm_iam_service_id" "service_id" {
   name = "test"
 }
 resource "ibm_iam_service_policy" "policy" {
-  iam_service_id = ibm_iam_service_id.serviceID.id
+  iam_service_id = ibm_iam_service_id.service_id.id
   roles           = ["Viewer"]
   resource_attributes {
     name  = "resource"
@@ -190,48 +191,72 @@ resource "ibm_iam_service_policy" "policy" {
 }
 ```
 
-## Argument Reference
+### Service Policy using service_type with region
 
-The following arguments are supported:
+```terraform
+resource "ibm_iam_service_id" "service_id" {
+  name = "test"
+}
 
-* `iam_service_id` - (Optional, Forces new resource, string) UUID of the serviceID. Exactly one of `iam_service_id`, `iam_id` is required.
-* `iam_id` - (Optional, Forces new resource, string) IAM ID of the serviceID. Exactly one of `iam_service_id`, `iam_id` is required. Can be used to assign cross account service ID Policy.
-* `roles` - (Required, list) comma separated list of roles. Valid roles are Writer, Reader, Manager, Administrator, Operator, Viewer, Editor.
-* `resources` - (Optional, list) A nested block describing the resource of this policy.
-Nested `resources` blocks have the following structure:
-  * `service` - (Optional, string) Service name of the policy definition.  You can retrieve the value by running the `ibmcloud catalog service-marketplace` or `ibmcloud catalog search` command in the [IBM Cloud CLI](https://cloud.ibm.com/docs/cli?topic=cloud-cli-getting-started).
-  * `resource_instance_id` - (Optional, string) ID of resource instance of the policy definition.
-  * `region` - (Optional, string) Region of the policy definition.
-  * `resource_type` - (Optional, string) Resource type of the policy definition.
-  * `resource` - (Optional, string) Resource of the policy definition.
-  * `resource_group_id` - (Optional, string) The ID of the resource group.  You can retrieve the value from data source `ibm_resource_group`. 
-  * `attributes` - (Optional, map) Set resource attributes in the form of `'name=value,name=value...`.
- **NOTE**: Conflicts with `account_management` and `resource_attributes`.
-* `resource_attributes` - (Optional, list) A nested block describing the resource of this policy.
-Nested `resource_attributes` blocks have the following structure:
-  * `name` - (Required, string) Name of the Attribute. Supported values are`serviceName` , `serviceInstance` , `region` ,`resourceType` , `resource` , `resourceGroupId` and other service specific resource attributes.
-  * `value` - (Required, string) Value of the Attribute.
-  * `operator` - (Optional, string) Operator of the Attribute. Default Value: `stringEquals`
- **NOTE**: Conflicts with `account_management` and `resources`.
-* `account_management` - (Optional, bool) Gives access to all account management services if set to `true`. Default value `false`. 
-  **NOTE**: Conflicts with `resources`and `resource_attributes`.
-* `tags` - (Optional, array of strings) Tags associated with the service policy instance.  
-  **NOTE**: `Tags` are managed locally and not stored on the IBM Cloud service endpoint at this moment.
+resource "ibm_iam_service_policy" "policy" {
+  iam_service_id = ibm_iam_service_id.service_id.id
+  roles          = ["Viewer"]
 
-## Attribute Reference
+  resources {
+    service_type = "service"
+    region = "us-south"
+	}
+}
 
-In addition to all arguments above, the following attributes are exported:
+```
 
-* `id` - The unique identifier of the service policy. The id is composed of \<iam_service_id\>/\<service_policy_id\> if policy is created using <iam_service_id>. The id is composed of \<iam_id\>/\<service_policy_id\> if policy is created using <iam_id>. 
+## Argument reference
+Review the argument references that you can specify for your resource. 
 
-* `version` - Version of the service policy.
+- `account_management` - (Optional, Bool) Gives access to all account management services if set to **true**. Default value is **false**. If you set this option, do not set `resources` at the same time.**Note** Conflicts with `resources` and `resource_attributes`.
+- `description`  (Optional, String) The description of the IAM Service Policy.
+- `iam_service_id` - (Required, Forces new resource, String) The UUID of the service ID.
+- `iam_id` - (Optional,  Forces new resource, String) IAM ID of the service ID. Used to assign cross account service ID policy. Either `iam_service_id` or `iam_id` is required.
+- `resources` - (List of Objects) Optional- A nested block describes the resource of this policy.**Note** Conflicts with `account_management` and `resource_attributes`.
+
+  Nested scheme for `resources`:
+  - `service`  (Optional, String) The service name of the policy definition. You can retrieve the value by running the `ibmcloud catalog service-marketplace` or `ibmcloud catalog search`. Attributes service, service_type are mutually exclusive.
+  - `service_type`  (Optional, String) The service type of the policy definition. **Note** Attributes service, service_type are mutually exclusive.
+  - `resource_instance_id` - (Optional, String) The ID of the resource instance of the policy definition.
+  - `region` - (Optional, String) The region of the policy definition.
+  - `resource_type` - (Optional, String) The resource type of the policy definition.
+  - `resource` - (Optional, String) The resource of the policy definition.
+  - `resource_group_id` - (Optional, String) The ID of the resource group. To retrieve the value, run `ibmcloud resource groups` or use the `ibm_resource_group` data source.
+  - `attributes` (Optional, Map)  A set of resource attributes in the format `name=value,name=value`. If you set this option, do not specify `account_management` and `resource_attributes` at the same time.
+- `resource_attributes` - (Optional, list) A nested block describing the resource of this policy. - `resource_attributes` - (Optional, List) A nested block describing the resource of this policy. **Note** Conflicts with `account_management` and `resources`.
+
+  Nested scheme for `resource_attributes`:
+  - `name` - (Required, String) The name of an attribute. Supported values are `serviceName` , `serviceInstance` , `region` ,`resourceType` , `resource` , `resourceGroupId` and other service specific resource attributes.
+  - `value` - (Required, String) The value of an attribute.
+  - `operator` - (Optional, String) Operator of an attribute. The default value is `stringEquals`. **Note** Conflicts with `account_management` and `resources`.
+- `roles` - (Required, List) A comma separated list of roles. Valid roles are `Writer`, `Reader`, `Manager`, `Administrator`, `Operator`, `Viewer`, and `Editor`. For more information, about supported service specific roles, see  [IAM roles and actions](https://cloud.ibm.com/docs/account?topic=account-iam-service-roles-actions)
+- `tags`  - (Optional, List of Strings) A list of tags with the service policy instance. **Note** Tags are managed locally and not stored in the IBM Cloud service endpoint at this moment.
+
+## Attribute reference
+In addition to all argument reference list, you can access the following attribute reference after your resource is created.
+
+- `id`  - (String) The unique identifier of the service policy. The ID is composed of `<iam_service_id>/<service_policy_id>`. If policy is created by using `<iam_service_id>`. The ID is composed of `<iam_id>/<service_policy_id>` if policy is created by using `<iam_id>`.
+- `version`  - (String) The version of the service policy.
 
 ## Import
 
-ibm_iam_service_policy can be imported using serviceID and service policy id or iamID and service policy id, eg
+The  `ibm_iam_service_policy` resource can be imported by using service ID and service policy ID or IAM ID and service policy ID.
+
+**Syntax**
+
+```
+$ terraform import ibm_iam_service_policy.example <service_ID>/<service_policy_ID>
+```
+
+**Example**
 
 ```
 $ terraform import ibm_iam_service_policy.example ServiceId-d7bec597-4726-451f-8a63-e62e6f19c32c/cea6651a-bc0a-4438-9f8a-a0770bbf3ebb
-$ terraform import ibm_iam_service_policy.example iam-ServiceId-d7bec597-4726-451f-8a63-e62e6f19c32c/cea6651a-bc0a-4438-9f8a-a0770bbf3ebb
+
 ```
 

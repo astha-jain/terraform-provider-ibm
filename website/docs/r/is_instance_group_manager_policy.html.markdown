@@ -7,49 +7,60 @@ description: |-
   Manages IBM VPC instance group manager policy.
 ---
 
-# ibm\_is_instance_group_manager_policy
+# ibm_is_instance_group_manager_policy
 
-Create update or delete a policy of an instance group manager
+Create, update or delete a policy of an instance group manager. For more information, about instance group manager policy, see [creating an instance group for auto scaling](https://cloud.ibm.com/docs/vpc?topic=vpc-creating-auto-scale-instance-group).
 
-## Example Usage
+**Note:** 
+VPC infrastructure services are a regional specific based endpoint, by default targets to `us-south`. Please make sure to target right region in the provider block as shown in the `provider.tf` file, if VPC service is created in region other than `us-south`.
 
+**provider.tf**
+
+```terraform
+provider "ibm" {
+  region = "eu-gb"
+}
+```
+
+## Example usage
 In the following example, you can create a policy for instance group manager.
-```hcl
-resource "ibm_is_vpc" "vpc2" {
-  name = "vpc2test"
+
+```terraform
+resource "ibm_is_vpc" "example" {
+  name = "example-vpc"
 }
 
-resource "ibm_is_subnet" "subnet2" {
-  name            = "subnet2"
-  vpc             = ibm_is_vpc.vpc2.id
+resource "ibm_is_subnet" "example" {
+  name            = "example-subnet"
+  vpc             = ibm_is_vpc.example.id
   zone            = "us-south-2"
   ipv4_cidr_block = "10.240.64.0/28"
 }
 
-resource "ibm_is_ssh_key" "sshkey" {
-  name       = "ssh1"
+resource "ibm_is_ssh_key" "example" {
+  name       = "example-ssh"
   public_key = "SSH_KEY"
 }
 
-resource "ibm_is_instance_template" "instancetemplate1" {
-  name    = "testtemplate"
-  image   = "r006-14140f94-fcc4-11e9-96e7-a72723715315"
+resource "ibm_is_instance_template" "example" {
+  name    = "example-template"
+  image   = ibm_is_image.example.id
   profile = "bx2-8x32"
 
   primary_network_interface {
-    subnet = ibm_is_subnet.subnet2.id
+    subnet = ibm_is_subnet.example.id
   }
 
-  vpc  = ibm_is_vpc.vpc2.id
+  vpc  = ibm_is_vpc.example.id
   zone = "us-south-2"
-  keys = [ibm_is_ssh_key.sshkey.id]
+  keys = [ibm_is_ssh_key.example.id]
 }
 
-resource "ibm_is_instance_group" "instance_group" {
-  name              = "testgroup"
-  instance_template = ibm_is_instance_template.instancetemplate1.id
+resource "ibm_is_instance_group" "example" {
+  name              = "example-instance-group"
+  instance_template = ibm_is_instance_template.example.id
   instance_count    = 2
-  subnets           = [ibm_is_subnet.subnet2.id]
+  subnets           = [ibm_is_subnet.example.id]
 
   //User can configure timeouts
   timeouts {
@@ -59,10 +70,10 @@ resource "ibm_is_instance_group" "instance_group" {
   }
 }
 
-resource "ibm_is_instance_group_manager" "instance_group_manager" {
-  name                 = "testmanager"
+resource "ibm_is_instance_group_manager" "example" {
+  name                 = "example-instance-group-manager"
   aggregation_window   = 120
-  instance_group       = ibm_is_instance_group.instance_group.id
+  instance_group       = ibm_is_instance_group.example.id
   cooldown             = 300
   manager_type         = "autoscale"
   enable_manager       = true
@@ -70,39 +81,37 @@ resource "ibm_is_instance_group_manager" "instance_group_manager" {
   min_membership_count = 1
 }
 
-resource "ibm_is_instance_group_manager_policy" "cpuPolicy" {
-  instance_group         = ibm_is_instance_group.instance_group.id
-  instance_group_manager = ibm_is_instance_group_manager.instance_group_manager.manager_id
+resource "ibm_is_instance_group_manager_policy" "example" {
+  instance_group         = ibm_is_instance_group.example.id
+  instance_group_manager = ibm_is_instance_group_manager.example.manager_id
   metric_type            = "cpu"
   metric_value           = 70
   policy_type            = "target"
-  name                   = "testpolicy"
+  name                   = "example-ig-manager-policy"
 }
 
 ```
 
-## Argument Reference
+## Argument reference
+Review the argument references that you can specify for your resource. 
 
-The following arguments are supported:
+- `instance_group` - (Required, String) The instance group ID.
+- `instance_group_manager` - (Required, String) The instance group manager ID for policy creation.
+- `policy_type` - (Required, String) The type of metric to evaluate.
+- `metric_type` - (Required, String) The type of metric to evaluate. The possible values for metric types are `cpu`, `memory`, `network_in`, and `network_out`.
+- `metric_value`- (Required, Integer) The metric value to evaluate.
+- `name` - (Optional, String) The name of the policy.
 
-* `name` - (Optional, string) The name of the policy.
-* `policy_type` - (Required, string) The type of metric to be evaluated.
-* `instance_group` - (Required, string) The instance group ID.
-* `instance_group_manager` - (Required, string) The instance group manager ID for policy creation.
-* `metric_type` - (Required, string) The type of metric to be evaluated. The possible values for metric types are cpu, memory, network_in and network_out
-* `metric_value` - (Required, int) The metric value to be evaluated.
+## Attribute reference
+In addition to all argument reference list, you can access the following attribute reference after your resource is created.
 
-## Attribute Reference
-
-In addition to all arguments above, the following attributes are exported:
-
-* `id` - Id is the comination of the instance group ID, insatnce group manager ID and instance group manager policy ID.
-* `policy_id` - ID of the policy
+- `id` - (String) The ID in the combination of instance group ID, instance group manager ID, and instance group manager policy ID.
+- `policy_id` - (String) The policy ID.
 
 ## Import
+The `ibm_is_instance_group_manager_policy` resource can be imported by using instance group ID, instance group manager ID and instance group manager policy ID.
 
-`ibm_is_instance_group_manager_policy` can be imported using instance group ID,  insatnce group manager ID and instance group manager policy ID.
-eg; ibm_is_instance_group_manager_policy.policy
+**Example**
 
 ```
 $ terraform import ibm_is_instance_group_manager_policy.policy r006-eea6b0b7-babd-47a8-82c5-ad73d1e10bef/r006-160b9a68-58c8-4ec3-84b0-ad553ccb1e5a/r006-94d99d1d-be65-4939-9006-1a1a767245b5

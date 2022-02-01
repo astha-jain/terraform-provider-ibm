@@ -7,69 +7,81 @@ description: |-
   Manages IBM load balancer pool member.
 ---
 
-# ibm\_is_lb_pool_member
+# ibm_is_lb_pool_member
+Create, update, or delete a pool member for a VPC load balancer. For more information, about load balancer listener pool member, see [Creating managed pools and instance groups](https://cloud.ibm.com/docs/vpc?topic=vpc-lbaas-integration-with-instance-groups).
 
-Provides a load balancer pool member resource. This allows load balancer pool member to be created, updated, and cancelled.
+**Note:** 
+VPC infrastructure services are a regional specific based endpoint, by default targets to `us-south`. Please make sure to target right region in the provider block as shown in the `provider.tf` file, if VPC service is created in region other than `us-south`.
 
+**provider.tf**
 
-## Example Usage
+```terraform
+provider "ibm" {
+  region = "eu-gb"
+}
+```
 
-In the following example, you can create a load balancer pool member for application load balancer:
+## Example usage
 
-```hcl
-resource "ibm_is_lb_pool_member" "testacc_lb_mem" {
-  lb             = "daac2b08-fe8a-443b-9b06-1cef79922dce"
-  pool           = "f087d3bd-3da8-452d-9ce4-c1010c9fec04"
+### Sample to create a load balancer pool member for application load balancer.
+
+```terraform
+resource "ibm_is_lb_pool_member" "example" {
+  lb             = ibm_is_lb.example.id
+  pool           = element(split("/", ibm_is_lb_pool.example.id), 1)
   port           = 8080
   target_address = "127.0.0.1"
   weight         = 60
 }
-
 ```
 
-In the following example, you can create a load balancer pool member for network load balancer:
+### Sample to create a load balancer pool member for network load balancer.
 
-```hcl
-resource "ibm_is_lb_pool_member" "testacc_lb_mem" {
-  lb             = "daac2b08-fe8a-443b-9b06-1cef79922dce"
-  pool           = "f087d3bd-3da8-452d-9ce4-c1010c9fec04"
-  port           = 8080
-  target_id      = "54ad563a-0261-11e9-8317-bec54e704988"
-  weight         = 60
+```terraform
+resource "ibm_is_lb_pool_member" "example" {
+  lb        = ibm_is_lb.example.id
+  pool      = element(split("/", ibm_is_lb_pool.example.id), 1)
+  port      = 8080
+  target_id = ibm_is_instance.example.id
+  weight    = 60
 }
-
 ```
 
 ## Timeouts
+The `ibm_is_lb_pool_member` resource provides the following [Timeouts](https://www.terraform.io/docs/language/resources/syntax.html) configuration options:
 
-ibm_is_lb_pool_member provides the following [Timeouts](https://www.terraform.io/docs/configuration/resources.html#timeouts) configuration options:
+- **create** - (Default 10 minutes) Used for creating Instance.
+- **update** - (Default 10 minutes) Used for updating Instance.
+- **delete** - (Default 10 minutes) Used for deleting Instance.
 
-* `create` - (Default 10 minutes) Used for creating Instance.
-* `update` - (Default 10 minutes) Used for updating Instance.
-* `delete` - (Default 10 minutes) Used for deleting Instance.
 
-## Argument Reference
+## Argument reference
+Review the argument references that you can specify for your resource. 
 
-The following arguments are supported:
+ - `lb` - (Required, Forces new resource, String) The load balancer unique identifier.
+- `pool` - (Required, Forces new resource, String) The load balancer pool unique identifier.
+- `port`- (Required, Integer) The port number of the application running in the server member.
+- `target_address` - (Required, String) The IP address of the pool member.
+- `target_id` - (Required, String) The unique identifier for the virtual server instance pool member. Required for network load balancer.
+- `weight` - (Optional, Integer) Weight of the server member. This option takes effect only when the load-balancing algorithm of its belonging pool is `weighted_round_robin`, Minimum allowed weight is `0` and Maximum allowed weight is `100`.
 
-* `pool` - (Required, Forces new resource, string) The load balancer pool unique identifier.
-* `lb` - (Required, Forces new resource, string)  The load balancer unique identifier.
-* `port` - (Required, int) The port number of the application running in the server member.
-* `target_address` - (Required for application load balancer, string) The IP address of the pool member.
-* `target_id` - (Required for network load balancer, string) The unique identifier for the virtual server instance pool member.
-* `weight` - (Optional, int) Weight of the server member. This option takes effect only when the load balancing algorithm of its belonging pool is weighted_round_robin
+## Attribute reference
+In addition to all argument reference list, you can access the following attribute reference after your resource is created.
 
-## Attribute Reference
-
-In addition to all arguments above, the following attributes are exported:
-
-* `id` - The unique identifier of the load balancer pool member.
-* `href` - The member's canonical URL.
-* `health` - Health of the server member in the pool.
+- `id` - (String) The unique identifier of the load balancer pool member.
+- `href` - (String) The member’s canonical URL.
+- `health` - (String) The health of the server member in the pool.
 
 ## Import
+The `ibm_is_lb_pool_member` resource can be imported by using the load balancer ID, pool ID, pool member ID.
 
-ibm_is_lb_pool_member can be imported using lbID, poolID and poolmemebrID, eg
+**Syntax**
+
+```
+$ terraform import ibm_is_lb_pool_member.example <loadbalancer_ID>/<pool_ID>/<pool_member_ID>
+```
+
+**Example**
 
 ```
 $ terraform import ibm_is_lb_pool_member.example d7bec597-4726-451f-8a63-e62e6f19c32c/cea6651a-bc0a-4438-9f8a-a0770bbf3ebb/gfe6651a-bc0a-5538-8h8a-b0770bbf32cc

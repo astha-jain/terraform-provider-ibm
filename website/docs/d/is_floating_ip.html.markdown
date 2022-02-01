@@ -3,34 +3,43 @@ subcategory: "VPC infrastructure"
 layout: "ibm"
 page_title: "IBM : floating_ip"
 description: |-
-  Fechtes floating ip information.
+  Fetches floating IP information.
 ---
 
-# ibm\_floating\_ip
+# ibm_floating_ip
+Retrieve an information of VPC floating IP on IBM Cloud as a read-only data source. For more information, about floating IP, see [about floating IP](https://cloud.ibm.com/docs/vpc?topic=vpc-creating-a-vpc-using-the-rest-apis#create-floating-ip-api-tutorial).
 
-Import the details of vpc floating ip on IBM Cloud as a read-only data source. You can then reference the fields of the data source in other resources within the same configuration using interpolation syntax.
+**Note:** 
+VPC infrastructure services are a regional specific based endpoint, by default targets to `us-south`. Please make sure to target right region in the provider block as shown in the `provider.tf` file, if VPC service is created in region other than `us-south`.
 
-## Example Usage
+**provider.tf**
 
-```hcl
-
-    data "ibm_is_floating_ip" "test" {
-        name   = "test-fp"
-    }
-
+```terraform
+provider "ibm" {
+  region = "eu-gb"
+}
 ```
-## Argument Reference
 
-The following arguments are supported:
+## Example usage
 
-* `name` - (Required, string) The name of the floating ip.
+```terraform
+data "ibm_is_floating_ip" "example" {
+  name = "example-floating-ip"
+}
+```
 
-## Attribute Reference
+## Argument reference
+Review the argument references that you can specify for your data source. 
 
-In addition to all arguments above, the following attributes are exported:
-* `id` - An alphanumeric value identifying the floating ip.	
-* `address` - Floating IP address that was created.
-* `status` - Provisioning status of the floating IP address. 
-* `tags` - Tags associate with VPC.
-* `target` -  ID of the network interface use to allocate the IP address.
-* `zone` -   Name of the zone where to create the floating IP address. 
+- `name` - (Required, String) The name of the floating IP.
+
+## Attribute reference
+In addition to the argument reference list, you can access the following attribute references after your data source is created. 
+
+- `address` - (String) The floating IP address that is created.
+- `crn` - (String) The CRN for this floating IP.
+- `id` - (String) The unique identifier of the floating IP.
+- `status` - (String) Provisioning status of the floating IP address.
+- `tags` - (String) The tags associated with VPC.
+- `target` - (String) The ID of the network interface used to allocate the floating IP address.
+- `zone` - (String) The zone name where to create the floating IP address.

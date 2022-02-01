@@ -3,42 +3,55 @@ subcategory: "VPC infrastructure"
 layout: "ibm"
 page_title: "IBM : Image"
 description: |-
-  Manages IBM Cloud Infrastructure Images.
+  Manages IBM Cloud infrastructure image.
 ---
 
-# ibm\_is_image
+# ibm_is_image
+Retrieve information of an existing IBM Cloud Infrastructure image as a read-only data source. For more information, about VPC custom images, see [IBM Cloud Importing and managing custom images](https://cloud.ibm.com/docs/vpc?topic=vpc-managing-images).
 
-Import the details of an existing IBM Cloud Infrastructure image as a read-only data source. You can then reference the fields of the data source in other resources within the same configuration using interpolation syntax.
+**Note:** 
+VPC infrastructure services are a regional specific based endpoint, by default targets to `us-south`. Please make sure to target right region in the provider block as shown in the `provider.tf` file, if VPC service is created in region other than `us-south`.
 
+**provider.tf**
 
-## Example Usage
-
-```hcl
-
-data "ibm_is_image" "ds_image" {
-  name = "centos-7.x-amd64"
+```terraform
+provider "ibm" {
+  region = "eu-gb"
 }
-
 ```
 
-## Argument Reference
+## Example usage
 
-The following arguments are supported:
+```terraform
 
-* `name` - (Required, string) The name of the image.
-* `visibility` - (Optional, string) The visibility of the image. Accepted values are `public` or `private`.
+data "ibm_is_image" "example" {
+  name = "centos-7.x-amd64"
+}
+```
+```terraform
+data "ibm_is_image" "example" {
+  identifier = ibm_is_image.example.id
+}
+```
 
+## Argument reference
+Review the argument references that you can specify for your data source.
 
-## Attribute Reference
+- `identifier` - (Optional, String) The id of the image.
+    ~> **Note:** `name` and `identifier` are mutually exclusive.
+- `name` - (Optional, String) The name of the image.
+    ~> **Note:** `name` and `identifier` are mutually exclusive.
+- `visibility` - (Optional, String) The visibility of the image. Accepted values are `public` or `private`.
 
-In addition to all arguments above, the following attributes are exported:
+## Attribute reference
+In addition to all argument reference list, you can access the following attribute references after your data source is created.
 
-* `id` - The unique identifier for this image.
-* `crn` - The CRN for this image.
-* `checksum` - The SHA256 Checksum for this image
-* `os` - The name of the operating system.
-* `status` - The status of this image.
-* `architecture` - The architecture for this image.
-* `encryption` - The type of encryption used on the image.
-* `encryption_key` - The CRN of the Key Protect Root Key or Hyper Protect Crypto Service Root Key for this resource.
-
+- `architecture` - (String) The architecture of the image.
+- `checksum`-  (String) The `SHA256` checksum of the image.
+- `crn` - (String) The CRN for this image.
+- `encryption` - (String) The type of encryption used of the image.
+- `encryption_key`-  (String) The CRN of the Key Protect or Hyper Protect Crypto Service root key for this resource.
+- `id` - (String) The unique identifier of the image.
+- `os` - (String) The name of the operating system.
+- `status` - (String) The status of this image.
+- `source_volume` - The source volume id of the image.
