@@ -593,7 +593,7 @@ func ResourceIBMISInstance() *schema.Resource {
 				Description: "Indicates whether the metadata service endpoint is available to the virtual server instance",
 			},
 
-			ResourceControllerURL: {
+			flex.ResourceControllerURL: {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The URL of the IBM Cloud dashboard that can be used to explore and view details about this instance",

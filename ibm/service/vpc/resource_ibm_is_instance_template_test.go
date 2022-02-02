@@ -56,8 +56,8 @@ func TestAccIBMISInstanceTemplate_metadata_service(t *testing.T) {
 	templateName := fmt.Sprintf("tf-testtemplate%d", randInt)
 	sshKeyName := fmt.Sprintf("tf-testsshkey%d", randInt)
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		PreCheck:     func() { acc.TestAccPreCheck(t) },
+		Providers:    acc.TestAccProviders,
 		CheckDestroy: testAccCheckIBMISInstanceTemplateDestroy,
 		Steps: []resource.TestStep{
 			{
