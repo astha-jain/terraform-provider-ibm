@@ -1,7 +1,7 @@
 // Copyright IBM Corp. 2021 All Rights Reserved.
 // Licensed under the Mozilla Public License v2.0
 
-package ibm
+package vpc
 
 import (
 	"context"
@@ -9,13 +9,14 @@ import (
 	"log"
 	"time"
 
+	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/conns"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/IBM/vpc-go-sdk/vpcv1"
 )
 
-func dataSourceIbmIsShareTargets() *schema.Resource {
+func DataSourceIbmIsShareTargets() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceIbmIsShareTargetsRead,
 
@@ -176,7 +177,7 @@ func dataSourceIbmIsShareTargets() *schema.Resource {
 }
 
 func dataSourceIbmIsShareTargetsRead(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	vpcClient, err := meta.(ClientSession).VpcV1API()
+	vpcClient, err := meta.(conns.ClientSession).VpcV1API()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -279,9 +280,9 @@ func dataSourceShareTargetCollectionTargetsSubnetToMap(subnetItem vpcv1.SubnetRe
 	if subnetItem.Name != nil {
 		subnetMap["name"] = subnetItem.Name
 	}
-	if subnetItem.ResourceType != nil {
+	/* if subnetItem.ResourceType != nil {
 		subnetMap["resource_type"] = subnetItem.ResourceType
-	}
+	} */
 
 	return subnetMap
 }
@@ -317,9 +318,9 @@ func dataSourceShareTargetCollectionTargetsVpcToMap(vpcItem vpcv1.VPCReference) 
 	if vpcItem.Name != nil {
 		vpcMap["name"] = vpcItem.Name
 	}
-	if vpcItem.ResourceType != nil {
+	/* if vpcItem.ResourceType != nil {
 		vpcMap["resource_type"] = vpcItem.ResourceType
-	}
+	} */
 
 	return vpcMap
 }

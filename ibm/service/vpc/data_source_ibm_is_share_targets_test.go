@@ -1,12 +1,13 @@
 // Copyright IBM Corp. 2021 All Rights Reserved.
 // Licensed under the Mozilla Public License v2.0
 
-package ibm
+package vpc_test
 
 import (
 	"fmt"
 	"testing"
 
+	acc "github.com/IBM-Cloud/terraform-provider-ibm/ibm/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -16,8 +17,8 @@ func TestAccIbmIsShareTargetsDataSource(t *testing.T) {
 	targetName := fmt.Sprintf("tf-share-target-%d", acctest.RandIntRange(10, 100))
 	shareName := fmt.Sprintf("tf-fs-name-%d", acctest.RandIntRange(10, 100))
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:  func() { acc.TestAccPreCheck(t) },
+		Providers: acc.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckIbmIsShareTargetsDataSourceConfigBasic(shareName, vpcName, targetName),
@@ -58,5 +59,5 @@ func testAccCheckIbmIsShareTargetsDataSourceConfigBasic(sname, vpcName, targetNa
 		data "ibm_is_share_targets" "is_share_targets" {
 			share = ibm_is_share_target.is_share_target.share
 		}
-	`, sname, shareProfileName, vpcName, targetName)
+	`, sname, acc.ShareProfileName, vpcName, targetName)
 }

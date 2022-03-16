@@ -1,45 +1,56 @@
 // Copyright IBM Corp. 2021 All Rights Reserved.
 // Licensed under the Mozilla Public License v2.0
 
-package ibm
+package vpc
 
 import (
 	"context"
 	"fmt"
 	"log"
 
+	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/conns"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/IBM/vpc-go-sdk/vpcv1"
 )
 
-func dataSourceIbmIsShareTarget() *schema.Resource {
+func DataSourceIbmIsShareTarget() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceIbmIsShareTargetRead,
 
 		Schema: map[string]*schema.Schema{
 			"share": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The file share identifier.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				AtLeastOneOf:  []string{"share", "share_target", "share_name", "share_target_name"},
+				RequiredWith:  []string{"share_target"},
+				ConflictsWith: []string{"share_name", "share_target_name"},
+				Description:   "The file share identifier.",
 			},
 			"share_target": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The share target identifier.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				RequiredWith:  []string{"share"},
+				ConflictsWith: []string{"share_name", "share_target_name"},
+				AtLeastOneOf:  []string{"share", "share_target", "share_name", "share_target_name"},
+				Description:   "The share target identifier.",
 			},
 			"share_name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ExactlyOneOf: []string{"share", "share_name"},
-				Description:  "The file share name.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				AtLeastOneOf:  []string{"share", "share_target", "share_name", "share_target_name"},
+				ConflictsWith: []string{"share", "share_target"},
+				RequiredWith:  []string{"share_target_name"},
+				Description:   "The file share name.",
 			},
 			"share_target_name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ExactlyOneOf: []string{"share_target", "share_target_name"},
-				Description:  "The share target name.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				AtLeastOneOf:  []string{"share", "share_target", "share_name", "share_target_name"},
+				ConflictsWith: []string{"share", "share_target"},
+				RequiredWith:  []string{"share_name"},
+				Description:   "The share target name.",
 			},
 			"created_at": {
 				Type:        schema.TypeString,
@@ -172,7 +183,7 @@ func dataSourceIbmIsShareTarget() *schema.Resource {
 }
 
 func dataSourceIbmIsShareTargetRead(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	vpcClient, err := meta.(ClientSession).VpcV1API()
+	vpcClient, err := meta.(conns.ClientSession).VpcV1API()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -292,9 +303,9 @@ func dataSourceShareTargetSubnetToMap(subnetItem vpcv1.SubnetReference) (subnetM
 	if subnetItem.Name != nil {
 		subnetMap["name"] = subnetItem.Name
 	}
-	if subnetItem.ResourceType != nil {
+	/* if subnetItem.ResourceType != nil {
 		subnetMap["resource_type"] = subnetItem.ResourceType
-	}
+	} */
 
 	return subnetMap
 }
@@ -338,9 +349,9 @@ func dataSourceShareTargetVpcToMap(vpcItem vpcv1.VPCReference) (vpcMap map[strin
 	if vpcItem.Name != nil {
 		vpcMap["name"] = vpcItem.Name
 	}
-	if vpcItem.ResourceType != nil {
+	/* if vpcItem.ResourceType != nil {
 		vpcMap["resource_type"] = vpcItem.ResourceType
-	}
+	} */
 
 	return vpcMap
 }

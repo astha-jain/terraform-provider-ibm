@@ -1,20 +1,22 @@
 // Copyright IBM Corp. 2021 All Rights Reserved.
 // Licensed under the Mozilla Public License v2.0
 
-package ibm
+package vpc
 
 import (
 	"context"
 	"fmt"
 	"log"
 
+	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/conns"
+	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/flex"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/IBM/vpc-go-sdk/vpcv1"
 )
 
-func dataSourceIbmIsShare() *schema.Resource {
+func DataSourceIbmIsShare() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceIbmIsShareRead,
 
@@ -139,14 +141,14 @@ func dataSourceIbmIsShare() *schema.Resource {
 				Type:        schema.TypeSet,
 				Computed:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
-				Set:         resourceIBMVPCHash,
+				Set:         flex.ResourceIBMVPCHash,
 				Description: "List of access management tags",
 			},
 			isFileShareTags: {
 				Type:        schema.TypeSet,
 				Computed:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
-				Set:         resourceIBMVPCHash,
+				Set:         flex.ResourceIBMVPCHash,
 				Description: "List of tags",
 			},
 		},
@@ -154,7 +156,7 @@ func dataSourceIbmIsShare() *schema.Resource {
 }
 
 func dataSourceIbmIsShareRead(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	vpcClient, err := meta.(ClientSession).VpcV1API()
+	vpcClient, err := meta.(conns.ClientSession).VpcV1API()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -265,13 +267,13 @@ func dataSourceIbmIsShareRead(context context.Context, d *schema.ResourceData, m
 			return diag.FromErr(fmt.Errorf("Error setting zone %s", err))
 		}
 	}
-	tags, err := GetGlobalTagsUsingCRN(meta, *share.CRN, "", isUserTagType)
+	tags, err := flex.GetGlobalTagsUsingCRN(meta, *share.CRN, "", isUserTagType)
 	if err != nil {
 		log.Printf(
 			"Error getting shares (%s) tags: %s", d.Id(), err)
 	}
 
-	accesstags, err := GetGlobalTagsUsingCRN(meta, *share.CRN, "", isAccessTagType)
+	accesstags, err := flex.GetGlobalTagsUsingCRN(meta, *share.CRN, "", isAccessTagType)
 	if err != nil {
 		log.Printf(
 			"Error getting shares (%s) access tags: %s", d.Id(), err)

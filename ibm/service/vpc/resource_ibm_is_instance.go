@@ -1378,46 +1378,48 @@ func instanceCreateByVolume(d *schema.ResourceData, meta interface{}, profile, n
 		instanceproto.PlacementTarget = placementGrp
 	}
 
-	if boot, ok := d.GetOk(isInstanceBootVolume); ok {
-		bootvol := boot.([]interface{})[0].(map[string]interface{})
-		var volTemplate = &vpcv1.VolumeAttachmentVolumePrototypeInstanceByVolumeContext{}
+	/*
+		if boot, ok := d.GetOk(isInstanceBootVolume); ok {
+			bootvol := boot.([]interface{})[0].(map[string]interface{})
+			var volTemplate = &vpcv1.VolumeAttachmentVolumePrototypeInstanceByVolumeContext{}
 
-		name, ok := bootvol[isInstanceBootAttachmentName]
-		namestr := name.(string)
-		if namestr != "" && ok {
-			volTemplate.Name = &namestr
-		}
-		sizeOk, ok := bootvol[isInstanceBootSize]
-		size := sizeOk.(int)
-		if size != 0 && ok {
-			sizeInt64 := int64(size)
-			volTemplate.Capacity = &sizeInt64
-		}
-		enc, ok := bootvol[isInstanceBootEncryption]
-		encstr := enc.(string)
-		if ok && encstr != "" {
-			volTemplate.EncryptionKey = &vpcv1.EncryptionKeyIdentity{
-				CRN: &encstr,
+			name, ok := bootvol[isInstanceBootAttachmentName]
+			namestr := name.(string)
+			if namestr != "" && ok {
+				volTemplate.Name = &namestr
+			}
+			sizeOk, ok := bootvol[isInstanceBootSize]
+			size := sizeOk.(int)
+			if size != 0 && ok {
+				sizeInt64 := int64(size)
+				volTemplate.Capacity = &sizeInt64
+			}
+			enc, ok := bootvol[isInstanceBootEncryption]
+			encstr := enc.(string)
+			if ok && encstr != "" {
+				volTemplate.EncryptionKey = &vpcv1.EncryptionKeyIdentity{
+					CRN: &encstr,
+				}
+			}
+
+			volprof := "general-purpose"
+			volTemplate.Profile = &vpcv1.VolumeProfileIdentity{
+				Name: &volprof,
+			}
+			snapshotId, ok := bootvol[isInstanceVolumeSnapshot]
+			snapshotIdStr := snapshotId.(string)
+			if snapshotIdStr != "" && ok {
+				volTemplate.SourceSnapshot = &vpcv1.SnapshotIdentity{
+					ID: &snapshotIdStr,
+				}
+			}
+			deletebool := true
+			instanceproto.BootVolumeAttachment = &vpcv1.VolumeAttachmentPrototypeInstanceByVolumeContext{
+				DeleteVolumeOnInstanceDelete: &deletebool,
+				Volume:                       volTemplate,
 			}
 		}
-
-		volprof := "general-purpose"
-		volTemplate.Profile = &vpcv1.VolumeProfileIdentity{
-			Name: &volprof,
-		}
-		snapshotId, ok := bootvol[isInstanceVolumeSnapshot]
-		snapshotIdStr := snapshotId.(string)
-		if snapshotIdStr != "" && ok {
-			volTemplate.SourceSnapshot = &vpcv1.SnapshotIdentity{
-				ID: &snapshotIdStr,
-			}
-		}
-		deletebool := true
-		instanceproto.BootVolumeAttachment = &vpcv1.VolumeAttachmentPrototypeInstanceByVolumeContext{
-			DeleteVolumeOnInstanceDelete: &deletebool,
-			Volume:                       volTemplate,
-		}
-	}
+	*/
 	if totalVolBandwidthIntf, ok := d.GetOk(isInstanceTotalVolumeBandwidth); ok {
 		totalVolBandwidthStr := int64(totalVolBandwidthIntf.(int))
 		instanceproto.TotalVolumeBandwidth = &totalVolBandwidthStr

@@ -1,12 +1,15 @@
 // Copyright IBM Corp. 2021 All Rights Reserved.
 // Licensed under the Mozilla Public License v2.0
 
-package ibm
+package vpc_test
 
 import (
 	"fmt"
 	"testing"
 
+	acc "github.com/IBM-Cloud/terraform-provider-ibm/ibm/acctest"
+	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/conns"
+	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/flex"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -21,8 +24,8 @@ func TestAccIbmIsShareTargetBasic(t *testing.T) {
 	targetNameUpdate := fmt.Sprintf("tf-target-%d", acctest.RandIntRange(10, 100))
 	sname := fmt.Sprintf("tf-fs-name-%d", acctest.RandIntRange(10, 100))
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		PreCheck:     func() { acc.TestAccPreCheck(t) },
+		Providers:    acc.TestAccProviders,
 		CheckDestroy: testAccCheckIbmIsShareTargetDestroy,
 		Steps: []resource.TestStep{
 			{
@@ -61,7 +64,7 @@ func testAccCheckIbmIsShareTargetConfigBasic(vpcName, sname, targetName string) 
 		vpc = ibm_is_vpc.testacc_vpc.id
 		name = "%s"
 	}
-	`, sname, shareProfileName, vpcName, targetName)
+	`, sname, acc.ShareProfileName, vpcName, targetName)
 }
 
 func testAccCheckIbmIsShareTargetExists(n string, obj vpcv1.ShareTarget) resource.TestCheckFunc {
@@ -72,14 +75,14 @@ func testAccCheckIbmIsShareTargetExists(n string, obj vpcv1.ShareTarget) resourc
 			return fmt.Errorf("Not found: %s", n)
 		}
 
-		vpcClient, err := testAccProvider.Meta().(ClientSession).VpcV1API()
+		vpcClient, err := acc.TestAccProvider.Meta().(conns.ClientSession).VpcV1API()
 		if err != nil {
 			return err
 		}
 
 		getShareTargetOptions := &vpcv1.GetShareTargetOptions{}
 
-		parts, err := idParts(rs.Primary.ID)
+		parts, err := flex.IdParts(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -98,7 +101,7 @@ func testAccCheckIbmIsShareTargetExists(n string, obj vpcv1.ShareTarget) resourc
 }
 
 func testAccCheckIbmIsShareTargetDestroy(s *terraform.State) error {
-	vpcClient, err := testAccProvider.Meta().(ClientSession).VpcV1API()
+	vpcClient, err := acc.TestAccProvider.Meta().(conns.ClientSession).VpcV1API()
 	if err != nil {
 		return err
 	}
@@ -109,7 +112,7 @@ func testAccCheckIbmIsShareTargetDestroy(s *terraform.State) error {
 
 		getShareTargetOptions := &vpcv1.GetShareTargetOptions{}
 
-		parts, err := idParts(rs.Primary.ID)
+		parts, err := flex.IdParts(rs.Primary.ID)
 		if err != nil {
 			return err
 		}

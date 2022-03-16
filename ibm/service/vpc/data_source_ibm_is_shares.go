@@ -1,7 +1,7 @@
 // Copyright IBM Corp. 2021 All Rights Reserved.
 // Licensed under the Mozilla Public License v2.0
 
-package ibm
+package vpc
 
 import (
 	"context"
@@ -9,13 +9,15 @@ import (
 	"log"
 	"time"
 
+	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/conns"
+	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/flex"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/IBM/vpc-go-sdk/vpcv1"
 )
 
-func dataSourceIbmIsShares() *schema.Resource {
+func DataSourceIbmIsShares() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceIbmIsSharesRead,
 
@@ -153,14 +155,14 @@ func dataSourceIbmIsShares() *schema.Resource {
 							Type:        schema.TypeSet,
 							Computed:    true,
 							Elem:        &schema.Schema{Type: schema.TypeString},
-							Set:         resourceIBMVPCHash,
+							Set:         flex.ResourceIBMVPCHash,
 							Description: "List of access management tags",
 						},
 						isFileShareTags: {
 							Type:        schema.TypeSet,
 							Computed:    true,
 							Elem:        &schema.Schema{Type: schema.TypeString},
-							Set:         resourceIBMVPCHash,
+							Set:         flex.ResourceIBMVPCHash,
 							Description: "List of tags",
 						},
 					},
@@ -176,7 +178,7 @@ func dataSourceIbmIsShares() *schema.Resource {
 }
 
 func dataSourceIbmIsSharesRead(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	vpcClient, err := meta.(ClientSession).VpcV1API()
+	vpcClient, err := meta.(conns.ClientSession).VpcV1API()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -211,7 +213,7 @@ func dataSourceIbmIsSharesRead(context context.Context, d *schema.ResourceData, 
 		if totalCount == 0 {
 			totalCount = int(*shareCollection.TotalCount)
 		}
-		start = GetNext(shareCollection.Next)
+		start = flex.GetNext(shareCollection.Next)
 		allrecs = append(allrecs, shareCollection.Shares...)
 		if start == "" {
 			break
@@ -258,7 +260,7 @@ func dataSourceShareCollectionSharesToMap(meta interface{}, sharesItem vpcv1.Sha
 	if sharesItem.Encryption != nil {
 		sharesMap["encryption"] = sharesItem.Encryption
 	}
-	if sharesItem.EncryptionKey != nil {
+	if sharesItem.EncryptionKey != nil && sharesItem.EncryptionKey.CRN != nil {
 		sharesMap["encryption_key"] = *sharesItem.EncryptionKey.CRN
 	}
 	if sharesItem.Href != nil {
@@ -298,13 +300,13 @@ func dataSourceShareCollectionSharesToMap(meta interface{}, sharesItem vpcv1.Sha
 	if sharesItem.Zone != nil {
 		sharesMap["zone"] = *sharesItem.Zone.Name
 	}
-	tags, err := GetGlobalTagsUsingCRN(meta, *sharesItem.CRN, "", isUserTagType)
+	tags, err := flex.GetGlobalTagsUsingCRN(meta, *sharesItem.CRN, "", isUserTagType)
 	if err != nil {
 		log.Printf(
 			"Error getting shares (%s) tags: %s", *sharesItem.ID, err)
 	}
 
-	accesstags, err := GetGlobalTagsUsingCRN(meta, *sharesItem.CRN, "", isAccessTagType)
+	accesstags, err := flex.GetGlobalTagsUsingCRN(meta, *sharesItem.CRN, "", isAccessTagType)
 	if err != nil {
 		log.Printf(
 			"Error gettings shares (%s) access tags: %s", *sharesItem.ID, err)

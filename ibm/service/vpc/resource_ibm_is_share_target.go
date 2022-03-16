@@ -1,7 +1,7 @@
 // Copyright IBM Corp. 2021 All Rights Reserved.
 // Licensed under the Mozilla Public License v2.0
 
-package ibm
+package vpc
 
 import (
 	"context"
@@ -9,6 +9,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/conns"
+	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/flex"
+	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/validate"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -16,7 +19,7 @@ import (
 	"github.com/IBM/vpc-go-sdk/vpcv1"
 )
 
-func resourceIbmIsShareTarget() *schema.Resource {
+func ResourceIbmIsShareTarget() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceIbmIsShareTargetCreate,
 		ReadContext:   resourceIbmIsShareTargetRead,
@@ -40,7 +43,7 @@ func resourceIbmIsShareTarget() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: InvokeValidator("ibm_is_share_target", "name"),
+				ValidateFunc: validate.InvokeValidator("ibm_is_share_target", "name"),
 				Description:  "The user-defined name for this share target. Names must be unique within the share the share target resides in. If unspecified, the name will be a hyphenated list of randomly-selected words.",
 			},
 			"subnet": {
@@ -82,13 +85,13 @@ func resourceIbmIsShareTarget() *schema.Resource {
 	}
 }
 
-func resourceIbmIsShareTargetValidator() *ResourceValidator {
-	validateSchema := make([]ValidateSchema, 1)
+func ResourceIbmIsShareTargetValidator() *validate.ResourceValidator {
+	validateSchema := make([]validate.ValidateSchema, 1)
 	validateSchema = append(validateSchema,
-		ValidateSchema{
+		validate.ValidateSchema{
 			Identifier:                 "name",
-			ValidateFunctionIdentifier: ValidateRegexpLen,
-			Type:                       TypeString,
+			ValidateFunctionIdentifier: validate.ValidateRegexpLen,
+			Type:                       validate.TypeString,
 			Optional:                   true,
 			Regexp:                     `^([a-z]|[a-z][-a-z0-9]*[a-z0-9]|[0-9][-a-z0-9]*([a-z]|[-a-z][-a-z0-9]*[a-z0-9]))$`,
 			MinValueLength:             1,
@@ -96,12 +99,12 @@ func resourceIbmIsShareTargetValidator() *ResourceValidator {
 		},
 	)
 
-	resourceValidator := ResourceValidator{ResourceName: "ibm_is_share_target", Schema: validateSchema}
+	resourceValidator := validate.ResourceValidator{ResourceName: "ibm_is_share_target", Schema: validateSchema}
 	return &resourceValidator
 }
 
 func resourceIbmIsShareTargetCreate(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	vpcClient, err := meta.(ClientSession).VpcV1API()
+	vpcClient, err := meta.(conns.ClientSession).VpcV1API()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -141,14 +144,14 @@ func resourceIbmIsShareTargetCreate(context context.Context, d *schema.ResourceD
 }
 
 func resourceIbmIsShareTargetRead(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	vpcClient, err := meta.(ClientSession).VpcV1API()
+	vpcClient, err := meta.(conns.ClientSession).VpcV1API()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	getShareTargetOptions := &vpcv1.GetShareTargetOptions{}
 
-	parts, err := idParts(d.Id())
+	parts, err := flex.IdParts(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -268,14 +271,14 @@ func resourceIbmIsShareTargetSubnetIdentityByHrefToMap(subnetIdentityByHref vpcv
 }
 
 func resourceIbmIsShareTargetUpdate(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	vpcClient, err := meta.(ClientSession).VpcV1API()
+	vpcClient, err := meta.(conns.ClientSession).VpcV1API()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	updateShareTargetOptions := &vpcv1.UpdateShareTargetOptions{}
 
-	parts, err := idParts(d.Id())
+	parts, err := flex.IdParts(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -311,14 +314,14 @@ func resourceIbmIsShareTargetUpdate(context context.Context, d *schema.ResourceD
 }
 
 func resourceIbmIsShareTargetDelete(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	vpcClient, err := meta.(ClientSession).VpcV1API()
+	vpcClient, err := meta.(conns.ClientSession).VpcV1API()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	deleteShareTargetOptions := &vpcv1.DeleteShareTargetOptions{}
 
-	parts, err := idParts(d.Id())
+	parts, err := flex.IdParts(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}

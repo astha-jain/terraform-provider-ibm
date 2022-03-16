@@ -1,13 +1,15 @@
 // Copyright IBM Corp. 2021 All Rights Reserved.
 // Licensed under the Mozilla Public License v2.0
 
-package ibm
+package vpc_test
 
 import (
 	"fmt"
 	"strconv"
 	"testing"
 
+	acc "github.com/IBM-Cloud/terraform-provider-ibm/ibm/acctest"
+	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/conns"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -19,8 +21,8 @@ func TestAccIbmIsShareBasic(t *testing.T) {
 	var conf vpcv1.Share
 	name := fmt.Sprintf("tf-fs-name-%d", acctest.RandIntRange(10, 100))
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		PreCheck:     func() { acc.TestAccPreCheck(t) },
+		Providers:    acc.TestAccProviders,
 		CheckDestroy: testAccCheckIbmIsShareDestroy,
 		Steps: []resource.TestStep{
 			{
@@ -48,8 +50,8 @@ func TestAccIbmIsShareAllArgs(t *testing.T) {
 	nameUpdate := fmt.Sprintf("tf-fs-name-%d", acctest.RandIntRange(10, 100))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		PreCheck:     func() { acc.TestAccPreCheck(t) },
+		Providers:    acc.TestAccProviders,
 		CheckDestroy: testAccCheckIbmIsShareDestroy,
 		Steps: []resource.TestStep{
 			{
@@ -83,7 +85,7 @@ func testAccCheckIbmIsShareConfigBasic(name string) string {
 			name = "%s"
 			profile = "%s"
 		}
-	`, name, shareProfileName)
+	`, name, acc.ShareProfileName)
 }
 
 func testAccCheckIbmIsShareConfig(vpcName, name string, size int, shareTergetName string) string {
@@ -107,7 +109,7 @@ func testAccCheckIbmIsShareConfig(vpcName, name string, size int, shareTergetNam
 		zone = "us-south-2"
 		tags = ["sr01", "sr02"]
 	}
-	`, vpcName, name, shareProfileName, size, shareTergetName)
+	`, vpcName, name, acc.ShareProfileName, size, shareTergetName)
 }
 
 func testAccCheckIbmIsShareExists(n string, obj vpcv1.Share) resource.TestCheckFunc {
@@ -118,7 +120,7 @@ func testAccCheckIbmIsShareExists(n string, obj vpcv1.Share) resource.TestCheckF
 			return fmt.Errorf("Not found: %s", n)
 		}
 
-		vpcClient, err := testAccProvider.Meta().(ClientSession).VpcV1API()
+		vpcClient, err := acc.TestAccProvider.Meta().(conns.ClientSession).VpcV1API()
 		if err != nil {
 			return err
 		}
@@ -138,7 +140,7 @@ func testAccCheckIbmIsShareExists(n string, obj vpcv1.Share) resource.TestCheckF
 }
 
 func testAccCheckIbmIsShareDestroy(s *terraform.State) error {
-	vpcClient, err := testAccProvider.Meta().(ClientSession).VpcV1API()
+	vpcClient, err := acc.TestAccProvider.Meta().(conns.ClientSession).VpcV1API()
 	if err != nil {
 		return err
 	}

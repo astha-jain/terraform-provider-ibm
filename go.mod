@@ -3,6 +3,7 @@ module github.com/IBM-Cloud/terraform-provider-ibm
 go 1.16
 
 require (
+	github.com/Bowery/prompt v0.0.0-20190916142128-fa8279994f75 // indirect
 	github.com/IBM-Cloud/bluemix-go v0.0.0-20220209072802-61d92fc63fd1
 	github.com/IBM-Cloud/container-services-go-sdk v0.0.0-20210705152127-41ca00fc9a62
 	github.com/IBM-Cloud/power-go-client v1.1.4
@@ -33,6 +34,7 @@ require (
 	github.com/apparentlymart/go-cidr v1.1.0
 	github.com/aws/aws-sdk-go v1.37.0 // indirect
 	github.com/cloudfoundry/jibber_jabber v0.0.0-20151120183258-bcc4c8345a21 // indirect
+	github.com/dchest/bcrypt_pbkdf v0.0.0-20150205184540-83f37f9c154a // indirect
 	github.com/dchest/safefile v0.0.0-20151022103144-855e8d98f185 // indirect
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-openapi/strfmt v0.21.2
@@ -53,8 +55,9 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/gox v1.0.1 // indirect
 	github.com/softlayer/softlayer-go v1.0.3
-	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97
-	golang.org/x/tools v0.1.7 // indirect
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
+	golang.org/x/sys v0.0.0-20220315194320-039c03cc5b86 // indirect
+	golang.org/x/tools v0.1.10 // indirect
 	google.golang.org/api v0.34.0 // indirect
 	gotest.tools v2.2.0+incompatible
 )
@@ -62,4 +65,5 @@ require (
 replace github.com/softlayer/softlayer-go v1.0.3 => github.com/IBM-Cloud/softlayer-go v1.0.5-tf
 
 replace github.com/dgrijalva/jwt-go v3.2.0+incompatible => github.com/golang-jwt/jwt v3.2.1+incompatible
+
 replace github.com/IBM/vpc-go-sdk => ./common/github.com/IBM/vpc-go-sdk

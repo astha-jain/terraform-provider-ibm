@@ -2242,7 +2242,7 @@ func ResourceIBMISLBPoolCookieValidate(diff *schema.ResourceDiff) error {
 	return nil
 }
 
-func resourceSharesValidate(diff *schema.ResourceDiff) error {
+func ResourceSharesValidate(diff *schema.ResourceDiff) error {
 
 	profile := ""
 	var size, iops int

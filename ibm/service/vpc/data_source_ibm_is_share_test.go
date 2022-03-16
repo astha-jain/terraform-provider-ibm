@@ -1,12 +1,13 @@
 // Copyright IBM Corp. 2021 All Rights Reserved.
 // Licensed under the Mozilla Public License v2.0
 
-package ibm
+package vpc_test
 
 import (
 	"fmt"
 	"testing"
 
+	acc "github.com/IBM-Cloud/terraform-provider-ibm/ibm/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -14,8 +15,8 @@ import (
 func TestAccIbmIsShareDataSourceBasic(t *testing.T) {
 	shareName := fmt.Sprintf("tf-fs-name-%d", acctest.RandIntRange(10, 100))
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:  func() { acc.TestAccPreCheck(t) },
+		Providers: acc.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckIbmIsShareDataSourceConfigBasic(shareName),
@@ -45,8 +46,8 @@ func TestAccIbmIsShareDataSourceAllArgs(t *testing.T) {
 	shareTargetName := fmt.Sprintf("tf-fs-tg-name-%d", acctest.RandIntRange(10, 100))
 	vpcName := fmt.Sprintf("tf-vpc-%d", acctest.RandIntRange(10, 100))
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:  func() { acc.TestAccPreCheck(t) },
+		Providers: acc.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckIbmIsShareDataSourceConfig(vpcName, shareName, shareSize, shareTargetName),
@@ -89,7 +90,7 @@ func testAccCheckIbmIsShareDataSourceConfigBasic(name string) string {
 		data "ibm_is_share" "is_share" {
 			share = ibm_is_share.is_share.id
 		}
-	`, name, shareProfileName)
+	`, name, acc.ShareProfileName)
 }
 
 func testAccCheckIbmIsShareDataSourceConfig(vpcName, shareName string, shareSize int, shareTargetName string) string {
@@ -112,5 +113,5 @@ func testAccCheckIbmIsShareDataSourceConfig(vpcName, shareName string, shareSize
 		data "ibm_is_share" "is_share" {
 			share = ibm_is_share.is_share.id
 		}
-	`, vpcName, shareName, shareSize, shareProfileName, shareTargetName)
+	`, vpcName, shareName, shareSize, acc.ShareProfileName, shareTargetName)
 }

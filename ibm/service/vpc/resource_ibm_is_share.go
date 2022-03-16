@@ -1,7 +1,7 @@
 // Copyright IBM Corp. 2021 All Rights Reserved.
 // Licensed under the Mozilla Public License v2.0
 
-package ibm
+package vpc
 
 import (
 	"context"
@@ -9,6 +9,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/conns"
+	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/flex"
+	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/validate"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -23,7 +26,7 @@ const (
 	isFileShareTags       = "tags"
 )
 
-func resourceIbmIsShare() *schema.Resource {
+func ResourceIbmIsShare() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceIbmIsShareCreate,
 		ReadContext:   resourceIbmIsShareRead,
@@ -34,13 +37,13 @@ func resourceIbmIsShare() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			customdiff.Sequence(
 				func(_ context.Context, diff *schema.ResourceDiff, v interface{}) error {
-					return resourceTagsCustomizeDiff(diff)
+					return flex.ResourceTagsCustomizeDiff(diff)
 				},
 			),
 
 			customdiff.Sequence(
 				func(_ context.Context, diff *schema.ResourceDiff, v interface{}) error {
-					return resourceSharesValidate(diff)
+					return flex.ResourceSharesValidate(diff)
 				}),
 		),
 
@@ -69,13 +72,13 @@ func resourceIbmIsShare() *schema.Resource {
 				Optional:     true,
 				Computed:     true,
 				ForceNew:     true,
-				ValidateFunc: InvokeValidator("ibm_is_share", "iops"),
+				ValidateFunc: validate.InvokeValidator("ibm_is_share", "iops"),
 				Description:  "The maximum input/output operation performance bandwidth per second for the file share.",
 			},
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: InvokeValidator("ibm_is_share", "name"),
+				ValidateFunc: validate.InvokeValidator("ibm_is_share", "name"),
 				Description:  "The unique user-defined name for this file share. If unspecified, the name will be a hyphenated list of randomly-selected words.",
 			},
 			"profile": {
@@ -94,7 +97,7 @@ func resourceIbmIsShare() *schema.Resource {
 			"size": {
 				Type:         schema.TypeInt,
 				Required:     true,
-				ValidateFunc: InvokeValidator("ibm_is_share", "size"),
+				ValidateFunc: validate.InvokeValidator("ibm_is_share", "size"),
 				Description:  "The size of the file share rounded up to the next gigabyte.",
 			},
 			"share_target_prototype": {
@@ -126,16 +129,16 @@ func resourceIbmIsShare() *schema.Resource {
 				Type:        schema.TypeSet,
 				Optional:    true,
 				Computed:    true,
-				Elem:        &schema.Schema{Type: schema.TypeString, ValidateFunc: InvokeValidator("ibm_is_share", "accesstag")},
-				Set:         resourceIBMVPCHash,
+				Elem:        &schema.Schema{Type: schema.TypeString, ValidateFunc: validate.InvokeValidator("ibm_is_share", "accesstag")},
+				Set:         flex.ResourceIBMVPCHash,
 				Description: "List of access management tags",
 			},
 			isFileShareTags: {
 				Type:        schema.TypeSet,
 				Optional:    true,
 				Computed:    true,
-				Elem:        &schema.Schema{Type: schema.TypeString, ValidateFunc: InvokeValidator("ibm_is_share", "tag")},
-				Set:         resourceIBMVPCHash,
+				Elem:        &schema.Schema{Type: schema.TypeString, ValidateFunc: validate.InvokeValidator("ibm_is_share", "tag")},
+				Set:         flex.ResourceIBMVPCHash,
 				Description: "List of tags",
 			},
 			"share_targets": {
@@ -215,47 +218,47 @@ func resourceIbmIsShare() *schema.Resource {
 	}
 }
 
-func resourceIbmIsShareValidator() *ResourceValidator {
-	validateSchema := make([]ValidateSchema, 1)
+func ResourceIbmIsShareValidator() *validate.ResourceValidator {
+	validateSchema := make([]validate.ValidateSchema, 1)
 	validateSchema = append(validateSchema,
-		ValidateSchema{
+		validate.ValidateSchema{
 			Identifier:                 "iops",
-			ValidateFunctionIdentifier: IntBetween,
-			Type:                       TypeInt,
+			ValidateFunctionIdentifier: validate.IntBetween,
+			Type:                       validate.TypeInt,
 			Optional:                   true,
 			MinValue:                   "100",
 			MaxValue:                   "48000",
 		},
-		ValidateSchema{
+		validate.ValidateSchema{
 			Identifier:                 "name",
-			ValidateFunctionIdentifier: ValidateRegexpLen,
-			Type:                       TypeString,
+			ValidateFunctionIdentifier: validate.ValidateRegexpLen,
+			Type:                       validate.TypeString,
 			Optional:                   true,
 			Regexp:                     `^([a-z]|[a-z][-a-z0-9]*[a-z0-9]|[0-9][-a-z0-9]*([a-z]|[-a-z][-a-z0-9]*[a-z0-9]))$`,
 			MinValueLength:             1,
 			MaxValueLength:             63,
 		},
-		ValidateSchema{
+		validate.ValidateSchema{
 			Identifier:                 "size",
-			ValidateFunctionIdentifier: IntBetween,
-			Type:                       TypeInt,
+			ValidateFunctionIdentifier: validate.IntBetween,
+			Type:                       validate.TypeInt,
 			Optional:                   true,
 			MinValue:                   "10",
 			MaxValue:                   "32000",
 		},
-		ValidateSchema{
+		validate.ValidateSchema{
 			Identifier:                 "tag",
-			ValidateFunctionIdentifier: ValidateRegexpLen,
-			Type:                       TypeString,
+			ValidateFunctionIdentifier: validate.ValidateRegexpLen,
+			Type:                       validate.TypeString,
 			Optional:                   true,
 			Regexp:                     `^[A-Za-z0-9:_ .-]+$`,
 			MinValueLength:             1,
 			MaxValueLength:             128,
 		},
-		ValidateSchema{
+		validate.ValidateSchema{
 			Identifier:                 "accesstag",
-			ValidateFunctionIdentifier: ValidateRegexpLen,
-			Type:                       TypeString,
+			ValidateFunctionIdentifier: validate.ValidateRegexpLen,
+			Type:                       validate.TypeString,
 			Optional:                   true,
 			Regexp:                     `^([ ]*[A-Za-z0-9:_.-]+[ ]*)+$`,
 			MinValueLength:             1,
@@ -263,58 +266,61 @@ func resourceIbmIsShareValidator() *ResourceValidator {
 		},
 	)
 
-	resourceValidator := ResourceValidator{ResourceName: "ibm_is_share", Schema: validateSchema}
+	resourceValidator := validate.ResourceValidator{ResourceName: "ibm_is_share", Schema: validateSchema}
 	return &resourceValidator
 }
 
 func resourceIbmIsShareCreate(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	vpcClient, err := meta.(ClientSession).VpcV1API()
+	vpcClient, err := meta.(conns.ClientSession).VpcV1API()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	createShareOptions := &vpcv1.CreateShareOptions{}
-
+	sharePrototype := &vpcv1.SharePrototype{}
 	if encryptionKeyIntf, ok := d.GetOk("encryption_key"); ok {
 		encryptionKey := encryptionKeyIntf.(string)
 		encryptionKeyIdentity := &vpcv1.EncryptionKeyIdentity{
 			CRN: &encryptionKey,
 		}
-		createShareOptions.SetEncryptionKey(encryptionKeyIdentity)
+		sharePrototype.EncryptionKey = encryptionKeyIdentity
 	}
 	initial_owner := &vpcv1.ShareInitialOwner{}
 	if o_gid, ok := d.GetOk("initial_owner_gid"); ok {
 		o_gidstr := o_gid.(int64)
 		initial_owner.Gid = &o_gidstr
-		createShareOptions.SetInitialOwner(initial_owner)
+		sharePrototype.InitialOwner = initial_owner
 	}
 	if u_gid, ok := d.GetOk("initial_owner_gid"); ok {
 		o_uidstr := u_gid.(int64)
 		initial_owner.Uid = &o_uidstr
-		createShareOptions.SetInitialOwner(initial_owner)
+		sharePrototype.InitialOwner = initial_owner
 	}
-	if _, ok := d.GetOk("iops"); ok {
-		createShareOptions.SetIops(int64(d.Get("iops").(int)))
+	if iopsIntf, ok := d.GetOk("iops"); ok {
+		iops := int64(iopsIntf.(int))
+		sharePrototype.Iops = &iops
 	}
-	if _, ok := d.GetOk("name"); ok {
-		createShareOptions.SetName(d.Get("name").(string))
+	if nameIntf, ok := d.GetOk("name"); ok {
+		name := nameIntf.(string)
+		sharePrototype.Name = &name
 	}
 	if profileIntf, ok := d.GetOk("profile"); ok {
 		profileStr := profileIntf.(string)
 		profile := &vpcv1.SharePrototypeProfile{
 			Name: &profileStr,
 		}
-		createShareOptions.SetProfile(profile)
+		sharePrototype.Profile = profile
 	}
 	if resgrp, ok := d.GetOk("resource_group"); ok {
 		resgrpstr := resgrp.(string)
 		resourceGroup := &vpcv1.ResourceGroupIdentity{
 			ID: &resgrpstr,
 		}
-		createShareOptions.SetResourceGroup(resourceGroup)
+		sharePrototype.ResourceGroup = resourceGroup
 	}
-	if _, ok := d.GetOk("size"); ok {
-		createShareOptions.SetSize(int64(d.Get("size").(int)))
+	if sizeIntf, ok := d.GetOk("size"); ok {
+		size := int64(sizeIntf.(int))
+		sharePrototype.Size = &size
 	}
 	if shareTargetPrototypeIntf, ok := d.GetOk("share_target_prototype"); ok {
 		var targets []vpcv1.ShareTargetPrototype
@@ -323,16 +329,16 @@ func resourceIbmIsShareCreate(context context.Context, d *schema.ResourceData, m
 			targetsItem := resourceIbmIsShareMapToShareTargetPrototype(value)
 			targets = append(targets, targetsItem)
 		}
-		createShareOptions.SetTargets(targets)
+		sharePrototype.Targets = targets
 	}
 	if zone, ok := d.GetOk("zone"); ok {
 		zonestr := zone.(string)
 		zone := &vpcv1.ZoneIdentity{
 			Name: &zonestr,
 		}
-		createShareOptions.SetZone(zone)
+		sharePrototype.Zone = zone
 	}
-
+	createShareOptions.SharePrototype = sharePrototype
 	share, response, err := vpcClient.CreateShareWithContext(context, createShareOptions)
 	if err != nil {
 		log.Printf("[DEBUG] CreateShareWithContext failed %s\n%s", err, response)
@@ -347,7 +353,7 @@ func resourceIbmIsShareCreate(context context.Context, d *schema.ResourceData, m
 	d.SetId(*share.ID)
 	if _, ok := d.GetOk(isFileShareTags); ok {
 		oldList, newList := d.GetChange(isFileShareTags)
-		err = UpdateGlobalTagsUsingCRN(oldList, newList, meta, *share.CRN, "", isUserTagType)
+		err = flex.UpdateGlobalTagsUsingCRN(oldList, newList, meta, *share.CRN, "", isUserTagType)
 		if err != nil {
 			log.Printf(
 				"Error creating file share (%s) tags: %s", d.Id(), err)
@@ -355,7 +361,7 @@ func resourceIbmIsShareCreate(context context.Context, d *schema.ResourceData, m
 	}
 	if _, ok := d.GetOk(isFileShareAccessTags); ok {
 		oldList, newList := d.GetChange(isFileShareAccessTags)
-		err = UpdateGlobalTagsUsingCRN(oldList, newList, meta, *share.CRN, "", isAccessTagType)
+		err = flex.UpdateGlobalTagsUsingCRN(oldList, newList, meta, *share.CRN, "", isAccessTagType)
 		if err != nil {
 			log.Printf(
 				"Error creating file share (%s) access tags: %s", d.Id(), err)
@@ -382,7 +388,7 @@ func resourceIbmIsShareMapToShareTargetPrototype(shareTargetPrototypeMap map[str
 }
 
 func resourceIbmIsShareRead(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	vpcClient, err := meta.(ClientSession).VpcV1API()
+	vpcClient, err := meta.(conns.ClientSession).VpcV1API()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -407,7 +413,7 @@ func resourceIbmIsShareRead(context context.Context, d *schema.ResourceData, met
 		}
 	}
 
-	if err = d.Set("iops", intValue(share.Iops)); err != nil {
+	if err = d.Set("iops", flex.IntValue(share.Iops)); err != nil {
 		return diag.FromErr(fmt.Errorf("Error setting iops: %s", err))
 	}
 	if err = d.Set("name", share.Name); err != nil {
@@ -423,7 +429,7 @@ func resourceIbmIsShareRead(context context.Context, d *schema.ResourceData, met
 			return diag.FromErr(fmt.Errorf("Error setting resource_group: %s", err))
 		}
 	}
-	if err = d.Set("size", intValue(share.Size)); err != nil {
+	if err = d.Set("size", flex.IntValue(share.Size)); err != nil {
 		return diag.FromErr(fmt.Errorf("Error setting size: %s", err))
 	}
 	targets := []map[string]interface{}{}
@@ -459,13 +465,13 @@ func resourceIbmIsShareRead(context context.Context, d *schema.ResourceData, met
 	if err = d.Set("resource_type", share.ResourceType); err != nil {
 		return diag.FromErr(fmt.Errorf("Error setting resource_type: %s", err))
 	}
-	tags, err := GetGlobalTagsUsingCRN(meta, *share.CRN, "", isUserTagType)
+	tags, err := flex.GetGlobalTagsUsingCRN(meta, *share.CRN, "", isUserTagType)
 	if err != nil {
 		log.Printf(
 			"Error getting shares (%s) tags: %s", d.Id(), err)
 	}
 
-	accesstags, err := GetGlobalTagsUsingCRN(meta, *share.CRN, "", isAccessTagType)
+	accesstags, err := flex.GetGlobalTagsUsingCRN(meta, *share.CRN, "", isAccessTagType)
 	if err != nil {
 		log.Printf(
 			"Error getting shares (%s) access tags: %s", d.Id(), err)
@@ -477,7 +483,7 @@ func resourceIbmIsShareRead(context context.Context, d *schema.ResourceData, met
 }
 
 func resourceIbmIsShareUpdate(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	vpcClient, err := meta.(ClientSession).VpcV1API()
+	vpcClient, err := meta.(conns.ClientSession).VpcV1API()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -518,7 +524,7 @@ func resourceIbmIsShareUpdate(context context.Context, d *schema.ResourceData, m
 	}
 	if d.HasChange(isFileShareTags) {
 		oldList, newList := d.GetChange(isFileShareTags)
-		err := UpdateGlobalTagsUsingCRN(oldList, newList, meta, d.Get("crn").(string), "", isUserTagType)
+		err := flex.UpdateGlobalTagsUsingCRN(oldList, newList, meta, d.Get("crn").(string), "", isUserTagType)
 		if err != nil {
 			log.Printf(
 				"Error updating shares (%s) tags: %s", d.Id(), err)
@@ -527,7 +533,7 @@ func resourceIbmIsShareUpdate(context context.Context, d *schema.ResourceData, m
 
 	if d.HasChange(isFileShareAccessTags) {
 		oldList, newList := d.GetChange(isFileShareAccessTags)
-		err := UpdateGlobalTagsUsingCRN(oldList, newList, meta, d.Get("crn").(string), "", isAccessTagType)
+		err := flex.UpdateGlobalTagsUsingCRN(oldList, newList, meta, d.Get("crn").(string), "", isAccessTagType)
 		if err != nil {
 			log.Printf(
 				"Error updating shares (%s) access tags: %s", d.Id(), err)
@@ -537,7 +543,7 @@ func resourceIbmIsShareUpdate(context context.Context, d *schema.ResourceData, m
 }
 
 func resourceIbmIsShareDelete(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	vpcClient, err := meta.(ClientSession).VpcV1API()
+	vpcClient, err := meta.(conns.ClientSession).VpcV1API()
 	if err != nil {
 		return diag.FromErr(err)
 	}

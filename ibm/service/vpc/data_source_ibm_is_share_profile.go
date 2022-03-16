@@ -1,7 +1,7 @@
 // Copyright IBM Corp. 2021 All Rights Reserved.
 // Licensed under the Mozilla Public License v2.0
 
-package ibm
+package vpc
 
 import (
 	"context"
@@ -9,13 +9,14 @@ import (
 	"log"
 	"time"
 
+	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/conns"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/IBM/vpc-go-sdk/vpcv1"
 )
 
-func dataSourceIbmIsShareProfile() *schema.Resource {
+func DataSourceIbmIsShareProfile() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceIbmIsShareProfileRead,
 
@@ -45,7 +46,7 @@ func dataSourceIbmIsShareProfile() *schema.Resource {
 }
 
 func dataSourceIbmIsShareProfileRead(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	vpcClient, err := meta.(ClientSession).VpcV1API()
+	vpcClient, err := meta.(conns.ClientSession).VpcV1API()
 	if err != nil {
 		return diag.FromErr(err)
 	}
