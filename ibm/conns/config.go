@@ -74,10 +74,9 @@ import (
 	resourcecontroller "github.com/IBM/platform-services-go-sdk/resourcecontrollerv2"
 	resourcemanager "github.com/IBM/platform-services-go-sdk/resourcemanagerv2"
 	"github.com/IBM/push-notifications-go-sdk/pushservicev1"
-	"github.com/IBM/scc-go-sdk/findingsv1"
 	"github.com/IBM/scc-go-sdk/v3/adminserviceapiv1"
 	"github.com/IBM/scc-go-sdk/v3/configurationgovernancev1"
-	"github.com/IBM/scc-go-sdk/v3/posturemanagementv2"
+	"github.com/IBM/scc-go-sdk/v4/posturemanagementv2"
 	schematicsv1 "github.com/IBM/schematics-go-sdk/schematicsv1"
 	"github.com/IBM/secrets-manager-go-sdk/secretsmanagerv1"
 	vpc "github.com/IBM/vpc-go-sdk/vpcv1"
@@ -115,7 +114,7 @@ import (
 	"github.com/IBM/event-notifications-go-admin-sdk/eventnotificationsv1"
 	"github.com/IBM/eventstreams-go-sdk/pkg/schemaregistryv1"
 	"github.com/IBM/ibm-hpcs-uko-sdk/ukov4"
-	"github.com/IBM/scc-go-sdk/v3/posturemanagementv1"
+	"github.com/IBM/scc-go-sdk/v4/posturemanagementv1"
 )
 
 // RetryAPIDelay - retry api delay
@@ -286,7 +285,6 @@ type ClientSession interface {
 	AtrackerV1() (*atrackerv1.AtrackerV1, error)
 	AtrackerV2() (*atrackerv2.AtrackerV2, error)
 	ESschemaRegistrySession() (*schemaregistryv1.SchemaregistryV1, error)
-	FindingsV1() (*findingsv1.FindingsV1, error)
 	AdminServiceApiV1() (*adminserviceapiv1.AdminServiceApiV1, error)
 	ConfigurationGovernanceV1() (*configurationgovernancev1.ConfigurationGovernanceV1, error)
 	PostureManagementV1() (*posturemanagementv1.PostureManagementV1, error)
@@ -580,10 +578,6 @@ type clientSession struct {
 	esSchemaRegistryClient *schemaregistryv1.SchemaregistryV1
 	esSchemaRegistryErr    error
 
-	// Security and Compliance Center (SCC)
-	findingsClient    *findingsv1.FindingsV1
-	findingsClientErr error
-
 	// Security and Compliance Center (SCC) Admin
 	adminServiceApiClient    *adminserviceapiv1.AdminServiceApiV1
 	adminServiceApiClientErr error
@@ -659,7 +653,11 @@ func (session clientSession) ContainerRegistryV1() (*containerregistryv1.Contain
 
 // SchematicsAPI provides schematics Service APIs ...
 func (sess clientSession) SchematicsV1() (*schematicsv1.SchematicsV1, error) {
-	return sess.schematicsClient, sess.schematicsClientErr
+	if sess.schematicsClientErr != nil {
+		return sess.schematicsClient, sess.schematicsClientErr
+	}
+	return sess.schematicsClient.Clone(), nil
+	// return sess.schematicsClient, sess.schematicsClientErr
 }
 
 // FunctionClient ...
@@ -1121,14 +1119,6 @@ func (session clientSession) AtrackerV2() (*atrackerv2.AtrackerV2, error) {
 
 func (session clientSession) ESschemaRegistrySession() (*schemaregistryv1.SchemaregistryV1, error) {
 	return session.esSchemaRegistryClient, session.esSchemaRegistryErr
-}
-
-// Security and Compliance center Findings API
-func (session clientSession) FindingsV1() (*findingsv1.FindingsV1, error) {
-	if session.findingsClientErr != nil {
-		return session.findingsClient, session.findingsClientErr
-	}
-	return session.findingsClient.Clone(), nil
 }
 
 //Security and Compliance center Admin API
@@ -1646,38 +1636,6 @@ func (c *Config) ClientSession() (interface{}, error) {
 		session.atrackerClientV2Err = fmt.Errorf("Error occurred while configuring Activity Tracker API Version 2 service: %q", err)
 	}
 
-	// SCC FINDINGS Service
-	var findingsClientURL string
-	if c.Visibility == "public" || c.Visibility == "public-and-private" {
-		findingsClientURL, err = findingsv1.GetServiceURLForRegion(c.Region)
-		if err != nil {
-			session.findingsClientErr = fmt.Errorf("[ERROR] Error occurred while configuring Security Insights Findings API service:  `%s` region not supported", c.Region)
-		}
-	} else {
-		session.findingsClientErr = fmt.Errorf("[ERROR] Error occurred while configuring Security Insights Findings API service: `%v` visibility not supported", c.Visibility)
-	}
-	if fileMap != nil && c.Visibility != "public-and-private" {
-		findingsClientURL = fileFallBack(fileMap, c.Visibility, "IBMCLOUD_SCC_FINDINGS_API_ENDPOINT", c.Region, findingsClientURL)
-	}
-	findingsClientOptions := &findingsv1.FindingsV1Options{
-		Authenticator: authenticator,
-		URL:           EnvFallBack([]string{"IBMCLOUD_SCC_FINDINGS_API_ENDPOINT"}, findingsClientURL),
-		AccountID:     core.StringPtr(userConfig.UserAccount),
-	}
-	// Construct the service client.
-	session.findingsClient, err = findingsv1.NewFindingsV1(findingsClientOptions)
-	if err != nil {
-		session.findingsClientErr = fmt.Errorf("[ERROR] Error occurred while configuring Security Insights Findings API service: %q", err)
-	}
-	if session.findingsClient != nil && session.findingsClient.Service != nil {
-		// Enable retries for API calls
-		session.findingsClient.Service.EnableRetries(c.RetryCount, c.RetryDelay)
-		// Add custom header for analytics
-		session.findingsClient.SetDefaultHeaders(gohttp.Header{
-			"X-Original-User-Agent": {fmt.Sprintf("terraform-provider-ibm/%s", version.Version)},
-		})
-	}
-
 	// SCC ADMIN Service
 	var adminServiceApiClientURL string
 	if c.Visibility == "private" || c.Visibility == "public-and-private" {
@@ -1710,15 +1668,10 @@ func (c *Config) ClientSession() (interface{}, error) {
 	}
 
 	// SCHEMATICS Service
-	schematicsEndpoint := "https://schematics.cloud.ibm.com"
+	// schematicsEndpoint := "https://schematics.cloud.ibm.com"
+	schematicsEndpoint := ContructEndpoint(fmt.Sprintf("%s.schematics", c.Region), cloudEndpoint)
 	if c.Visibility == "private" || c.Visibility == "public-and-private" {
-		if c.Region == "us-south" || c.Region == "us-east" {
-			schematicsEndpoint = ContructEndpoint("private-us.schematics", cloudEndpoint)
-		} else if c.Region == "eu-gb" || c.Region == "eu-de" {
-			schematicsEndpoint = ContructEndpoint("private-eu.schematics", cloudEndpoint)
-		} else {
-			schematicsEndpoint = "https://schematics.cloud.ibm.com"
-		}
+		schematicsEndpoint = ContructEndpoint(fmt.Sprintf("private-%s.schematics", c.Region), cloudEndpoint)
 	}
 	if fileMap != nil && c.Visibility != "public-and-private" {
 		schematicsEndpoint = fileFallBack(fileMap, c.Visibility, "IBMCLOUD_SCHEMATICS_API_ENDPOINT", c.Region, schematicsEndpoint)

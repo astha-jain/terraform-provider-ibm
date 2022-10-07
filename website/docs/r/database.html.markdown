@@ -61,7 +61,7 @@ resource "ibm_database" "<your_database>" {
 }
 
 output "ICD Etcd database connection string" {
-  value = "http://${ibm_database.test_acc.connectionstrings[0].composed}"
+  value  = "http://${ibm_database.test_acc.ibm_database_connection.icd_conn}"
 }
 
 ```
@@ -99,7 +99,7 @@ resource "ibm_database" "<your_database>" {
 }
 
 output "ICD Etcd database connection string" {
-  value = "http://${ibm_database.test_acc.connectionstrings[0].composed}"
+  value = "http://${ibm_database.test_acc.ibm_database_connection.icd_conn}"
 }
 
 ```
@@ -150,7 +150,7 @@ resource "ibm_database" "<your_database>" {
 }
 
 output "ICD Etcd database connection string" {
-  value = "http://${ibm_database.test_acc.connectionstrings[0].composed}"
+  value = "http://${ibm_database.test_acc.ibm_database_connection.icd_conn}"
 }
 
 ```
@@ -574,10 +574,10 @@ Review the argument reference that you can specify for your resource.
 - `members_memory_allocation_mb` **Deprecated** - (Optional, Integer) The amount of memory in megabytes for the database, split across all members. If not specified, the default setting of the database service is used, which can vary by database type.
 - `members_disk_allocation_mb` **Deprecated** - (Optional, Integer) The amount of disk space for the database, split across all members. If not specified, the default setting of the database service is used, which can vary by database type.
 - `members_cpu_allocation_count` **Deprecated** - (Optional, Integer) Enables and allocates the number of specified dedicated cores to your deployment.
-- `node_count` **Deprecated** - (Optional, Integer) The total number of nodes in the cluster. If not specified defaults to the database minimum node count. These vary by database type. See the documentation related to each database for the defaults. https://cloud.ibm.com/docs/services/databases-for-postgresql/howto-provisioning.html#list-of-additional-parameters
+- `node_count` **Deprecated** - (Optional, Integer) The total number of nodes in the cluster. If not specified defaults to the database minimum node count. These vary by database type. See the documentation related to each database for the defaults. https://cloud.ibm.com/docs/databases-for-postgresql?topic=cloud-databases-provisioning#provisioning-parameters
 - `node_cpu_allocation_count` **Deprecated** - (Optional, Integer) Enables and allocates the number of specified dedicated cores to your deployment per node.
 - `node_disk_allocation_mb` **Deprecated**  - (Optional, Integer) The disk size of the database per node. As above.
-- `node_memory_allocation_mb` **Deprecated** - (Optional,Integer) The memory size for the database per node. If not specified defaults to the database default. These vary by database type. See the documentation related to each database for the defaults. https://cloud.ibm.com/docs/services/databases-for-postgresql/howto-provisioning.html#list-of-additional-parameters
+- `node_memory_allocation_mb` **Deprecated** - (Optional,Integer) The memory size for the database per node. If not specified defaults to the database default. These vary by database type. See the documentation related to each database for the defaults. https://cloud.ibm.com/docs/databases-for-postgresql?topic=cloud-databases-provisioning#provisioning-parameters
 
   ~> **Note:** `members_memory_allocation_mb`, `members_disk_allocation_mb`, `members_cpu_allocation_count` conflicts with `node_count`,`node_cpu_allocation_count`, `node_disk_allocation_mb`, `node_memory_allocation_mb`. `group` conflicts with `node_` and `members_` arguments. Either members, node, or group arguments have to be provided.
 - `name` - (Required, String) A descriptive name that is used to identify the database instance. The name must not include spaces.
@@ -611,7 +611,7 @@ In addition to all argument references list, you can access the following attrib
 
 - `adminuser` - (String) The user ID of the database administrator. Example, `admin` or `root`.
 - `configuration_schema` (String) Database Configuration Schema in JSON format.
-- `connectionstrings` - (Array) A list of connection strings for the database for each user ID. For more information, about how to use connection strings, see the [documentation](https://cloud.ibm.com/docs/databases-for-postgresql?topic=databases-for-postgresql-connection-strings). The results are returned in pairs of the userid and string: `connectionstrings.1.name = admin connectionstrings.1.string = postgres://admin:$PASSWORD@79226bd4-4076-4873-b5ce-b1dba48ff8c4.b8a5e798d2d04f2e860e54e5d042c915.databases.appdomain.cloud:32554/ibmclouddb?sslmode=verify-full` Individual string parameters can be retrieved by using  Terraform variables and outputs `connectionstrings.x.hosts.x.port` and `connectionstrings.x.hosts.x.host`.
+- `connectionstrings` - **Deprecated** - (Array) A list of connection strings for the database for each user ID - replaced by `bm_database_connection`. For more information, about how to use connection strings, see the [documentation](https://cloud.ibm.com/docs/databases-for-postgresql?topic=databases-for-postgresql-connection-strings). The results are returned in pairs of the userid and string: `connectionstrings.1.name = admin connectionstrings.1.string = postgres://admin:$PASSWORD@79226bd4-4076-4873-b5ce-b1dba48ff8c4.b8a5e798d2d04f2e860e54e5d042c915.databases.appdomain.cloud:32554/ibmclouddb?sslmode=verify-full` Individual string parameters can be retrieved by using  Terraform variables and outputs `connectionstrings.x.hosts.x.port` and `connectionstrings.x.hosts.x.host`.
 - `id` - (String) The CRN of the database instance.
 - `status` - (String) The status of the instance.
 - `version` - (String) The database version.

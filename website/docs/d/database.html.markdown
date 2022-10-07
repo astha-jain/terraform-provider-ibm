@@ -36,7 +36,7 @@ In addition to all argument references list, you can access the following attrib
 
 - `adminuser` - (String)  The user ID of the default administration user for the database, such as `admin` or `root`.
 - `cert_file_path` - (String)  The absolute path to certificate PEM file.
-- `connectionstrings`  (List) List of connection strings by userid for the database. For information about how to use connection strings, see the [documentation](https://cloud.ibm.com/docs/databases-for-postgresql?topic=databases-for-postgresql-connection-strings). The results are returned in pairs of the userid and string: `connectionstrings.1.name = admin connectionstrings.1.string = postgres://admin:$PASSWORD@12345aa1-1111-1111-a1aa-a1aaa11aa1a1.a1a1a111a1a11a1a111a111a1a111a111.databases.appdomain.cloud:32554/ibmclouddb?sslmode=verify-full`.
+- `connectionstrings` - **Deprecated** - (List) List of connection strings by userid for the database - replaced by `bm_database_connection` For information about how to use connection strings, see the [documentation](https://cloud.ibm.com/docs/databases-for-postgresql?topic=databases-for-postgresql-connection-strings). The results are returned in pairs of the userid and string: `connectionstrings.1.name = admin connectionstrings.1.string = postgres://admin:$PASSWORD@12345aa1-1111-1111-a1aa-a1aaa11aa1a1.a1a1a111a1a11a1a111a111a1a111a111.databases.appdomain.cloud:32554/ibmclouddb?sslmode=verify-full`.
 - `configuration_schema` (String) Database Configuration Schema in JSON format.
 - `id` - (String) The CRN of the IBM Cloud Databases instance.
 - `guid` - (String) The unique identifier of the IBM Cloud Databases instance.
@@ -47,7 +47,7 @@ In addition to all argument references list, you can access the following attrib
 - `platform_options`-  (String) The CRN of key protect key.
    
    Nested scheme for `platform_options`:
-   - `key_protect_key_id`-  (String) The CRN of key protect key.
+   - `key_protect_key_id`-  **Deprecated** - (String) The CRN of key protect key. - replaced by `disk_encryption_key_crn`
    - `disk_encryption_key_crn`-  (String) The CRN of disk encryption key.
    - `backup_encryption_key_crn`-  (String) The CRN of backup encryption key.
    
