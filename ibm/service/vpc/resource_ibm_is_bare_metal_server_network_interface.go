@@ -384,16 +384,30 @@ func resourceIBMISBareMetalServerNetworkInterfaceCreate(context context.Context,
 		if err != nil || nic == nil {
 			return diag.FromErr(fmt.Errorf("[DEBUG] Create bare metal server (%s) network interface err %s\n%s", bareMetalServerId, err, response))
 		}
+		switch reflect.TypeOf(nic).String() {
+		case "*vpcv1.BareMetalServerNetworkInterfaceByPci":
+			{
+				nicIntf := nic.(*vpcv1.BareMetalServerNetworkInterfaceByPci)
+				d.SetId(MakeTerraformNICID(bareMetalServerId, *nicIntf.ID))
+			}
+		case "*vpcv1.BareMetalServerNetworkInterfaceByVlan":
+			{
+				nicIntf := nic.(*vpcv1.BareMetalServerNetworkInterfaceByVlan)
+				d.SetId(MakeTerraformNICID(bareMetalServerId, *nicIntf.ID))
+			}
+		}
 
 		_, nicId, err := ParseNICTerraformID(d.Id())
 		if err != nil {
 			return diag.FromErr(err)
 		}
+
 		log.Printf("[INFO] Bare Metal Server Network Interface : %s", d.Id())
 		_, err = isWaitForBareMetalServerNetworkInterfaceAvailable(sess, bareMetalServerId, nicId, d.Timeout(schema.TimeoutCreate), d)
 		if err != nil {
 			return diag.FromErr(err)
 		}
+
 		err = bareMetalServerNICGet(d, meta, sess, nic, bareMetalServerId)
 		if err != nil {
 			return diag.FromErr(err)
@@ -527,7 +541,6 @@ func createVlanTypeNetworkInterface(context context.Context, d *schema.ResourceD
 			nicIntf := nic.(*vpcv1.BareMetalServerNetworkInterfaceByVlan)
 			d.SetId(MakeTerraformNICID(bareMetalServerId, *nicIntf.ID))
 		}
-
 	}
 
 	err = bareMetalServerNICGet(d, meta, sess, nic, bareMetalServerId)
