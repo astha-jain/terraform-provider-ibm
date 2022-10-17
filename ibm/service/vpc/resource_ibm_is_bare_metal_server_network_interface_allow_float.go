@@ -46,7 +46,7 @@ func ResourceIBMIsBareMetalServerNetworkInterfaceAllowFloat() *schema.Resource {
 
 			isBareMetalServerFloatingID: {
 				Type:        schema.TypeString,
-				Required:    true,
+				Computed:    true,
 				Description: "Bare metal server identifier of the server to which nic is floating to",
 			},
 			isBareMetalServerNicID: {
