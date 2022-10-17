@@ -304,7 +304,7 @@ func createVlanTypeNetworkInterfaceAllowFloat(context context.Context, d *schema
 	if err != nil || nic == nil {
 		return fmt.Errorf("[DEBUG] Create bare metal server (%s) network interface err %s\n%s", bareMetalServerId, err, response)
 	}
-
+	d.Set(isBareMetalServerFloatingID, bareMetalServerId)
 	switch reflect.TypeOf(nic).String() {
 	case "*vpcv1.BareMetalServerNetworkInterfaceByPci":
 		{
