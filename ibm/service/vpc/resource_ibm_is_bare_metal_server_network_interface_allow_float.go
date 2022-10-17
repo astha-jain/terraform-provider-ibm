@@ -17,6 +17,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+const (
+	isBareMetalServerFloatingID = "floating_bare_metal_server"
+)
+
 func ResourceIBMIsBareMetalServerNetworkInterfaceAllowFloat() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceIBMISBareMetalServerNetworkInterfaceAllowFloatCreate,
@@ -38,6 +42,12 @@ func ResourceIBMIsBareMetalServerNetworkInterfaceAllowFloat() *schema.Resource {
 				Required:         true,
 				DiffSuppressFunc: flex.ApplyOnce,
 				Description:      "Bare metal server identifier",
+			},
+
+			isBareMetalServerFloatingID: {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Bare metal server identifier of the server to which nic is floating to",
 			},
 			isBareMetalServerNicID: {
 				Type:        schema.TypeString,
@@ -312,6 +322,7 @@ func createVlanTypeNetworkInterfaceAllowFloat(context context.Context, d *schema
 
 func resourceIBMISBareMetalServerNetworkInterfaceAllowFloatRead(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	bareMetalServerId, nicID, err := ParseNICTerraformID(d.Id())
+	d.Set(isBareMetalServerFloatingID, bareMetalServerId)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -328,7 +339,7 @@ func resourceIBMISBareMetalServerNetworkInterfaceAllowFloatRead(context context.
 	nicIntf, response, err := sess.GetBareMetalServerNetworkInterfaceWithContext(context, options)
 	if (err != nil || nicIntf == nil) && response != nil {
 		//if original nic is not present, try fetching nic without server id
-		nicIntf, response, err = findNicsWithoutBMS(context, sess, nicID)
+		nicIntf, response, err = findNicsWithoutBMS(context, d, sess, nicID)
 		// response here can be either nil or not nil and if it returns 404 means nic is deleted
 		if response != nil && response.StatusCode == 404 {
 			d.SetId("")
@@ -350,7 +361,7 @@ func resourceIBMISBareMetalServerNetworkInterfaceAllowFloatRead(context context.
 	return nil
 }
 
-func findNicsWithoutBMS(context context.Context, sess *vpcv1.VpcV1, nicId string) (result vpcv1.BareMetalServerNetworkInterfaceIntf, response *core.DetailedResponse, err error) {
+func findNicsWithoutBMS(context context.Context, d *schema.ResourceData, sess *vpcv1.VpcV1, nicId string) (result vpcv1.BareMetalServerNetworkInterfaceIntf, response *core.DetailedResponse, err error) {
 	// listing all servers
 	start := ""
 	allrecs := []vpcv1.BareMetalServer{}
@@ -379,6 +390,7 @@ func findNicsWithoutBMS(context context.Context, sess *vpcv1.VpcV1, nicId string
 					ID:                &nicId,
 				}
 				//return response of the server nic matches
+				d.Set(isBareMetalServerFloatingID, *server.ID)
 				return sess.GetBareMetalServerNetworkInterfaceWithContext(context, options)
 			}
 		}
